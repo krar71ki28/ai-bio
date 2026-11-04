@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>AI Evolution Pro | تطور الذكاء الاصطناعي</title>
+<title>AI Evolution Pro | مشروعي الخاص</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
@@ -21,11 +21,16 @@
   .simulator-container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
   .canvas-wrapper { position: relative; width: 100%; height: 60vh; min-height: 400px; background: #0b1120; border-radius: 20px; overflow: hidden; border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
   canvas { display: block; width: 100%; height: 100%; }
+  
   .stats-bar { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 10px; background: var(--card); border-radius: 16px; padding: 15px; margin-top: -30px; position: relative; z-index: 10; width: 90%; margin-left: auto; margin-right: auto; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
   .stat-item { text-align: center; }
   .stat-item span { display: block; font-size: 12px; color: var(--text-muted); }
   .stat-item b { font-size: 20px; color: var(--primary); font-weight: 900; }
   .stat-item .gold { color: var(--accent); }
+  
+  .personal-best { text-align: center; margin-top: 15px; font-size: 14px; color: #cbd5e1; background: rgba(56, 189, 248, 0.1); padding: 10px; border-radius: 12px; width: 90%; max-width: 900px; margin-left: auto; margin-right: auto; border: 1px solid rgba(56, 189, 248, 0.2); }
+  .personal-best b { color: var(--primary); }
+
   .controls { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 20px; margin-bottom: 20px; }
   .btn { padding: 12px 20px; border: none; border-radius: 12px; font-family: 'Cairo'; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
   .btn:active { transform: scale(0.95); }
@@ -35,7 +40,8 @@
   .btn-purple { background: #a78bfa; color: #000; }
   .btn-green { background: #10b981; color: #fff; }
   .btn-red { background: #ef4444; color: #fff; }
-  .how-it-works { padding: 80px 20px; max-width: 900px; margin: 0 auto; text-align: center; }
+  
+  .how-it-works { padding: 60px 20px 30px; max-width: 900px; margin: 0 auto; text-align: center; }
   .how-it-works h2 { font-size: 28px; margin-bottom: 40px; }
   .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
   .step-card { background: var(--card); padding: 30px 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
@@ -43,7 +49,8 @@
   .step-icon { font-size: 40px; margin-bottom: 15px; }
   .step-card h3 { font-size: 18px; margin-bottom: 10px; color: var(--primary); }
   .step-card p { font-size: 14px; color: var(--text-muted); }
-  footer { text-align: center; padding: 30px; color: var(--text-muted); font-size: 14px; border-top: 1px solid rgba(255,255,255,0.05); }
+
+  footer { text-align: center; padding: 30px; color: var(--text-muted); font-size: 14px; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 40px; }
   #fileInput { display: none; }
 
   @media (max-width: 768px) {
@@ -66,38 +73,45 @@
 </nav>
 <header class="hero">
   <h1>شاهد <span>الذكاء الاصطناعي</span> يتطور أمام عينك</h1>
-  <p>محاكي متطور (نسخة Pro). الشبكة العصبية أكبر، والهدف يتحرك! الكائنات تتعلم المطاردة وتجنب العوائق عبر الأجيال.</p>
+  <p>محاكي متطور. الشبكة العصبية تتطور عبر الأجيال لتتعلم المطاردة وتجنب العوائق. تقدمك يُحفظ تلقائياً!</p>
 </header>
 <main class="simulator-container" id="simulator">
   <div class="canvas-wrapper">
     <canvas id="canvas"></canvas>
   </div>
   <div class="stats-bar">
-    <div class="stat-item"><span>الجيل</span><b id="statGen">1</b></div>
+    <div class="stat-item"><span>الجيل الحالي</span><b id="statGen">1</b></div>
     <div class="stat-item"><span>الكائنات الحية</span><b id="statAlive">40</b></div>
     <div class="stat-item"><span>أفضل لياقة</span><b class="gold" id="statBest">0</b></div>
-    <div class="stat-item"><span>حالة الذكاء</span><b id="statStatus" style="font-size:14px; margin-top:4px;">يتعلم...</b></div>
+    <div class="stat-item"><span>الرقم القياسي</span><b id="statRecord" style="color:#a78bfa;">1</b></div>
   </div>
+  
+  <div class="personal-best" id="personalBestBox" style="display:none;">
+    🔥 رقمك القياسي على هذا الجهاز: <b id="personalBestGen">1</b> جيل
+  </div>
+
   <div class="controls">
     <button class="btn btn-primary" id="btnSpeed">⏩ السرعة: x1</button>
     <button class="btn btn-secondary" id="btnPause">⏸️ إيقاف</button>
     <button class="btn btn-red" id="btnChampion" style="display:none;">🏆 عرض البطل</button>
     <button class="btn btn-accent" id="btnSaveBrain">💾 حفظ العقل</button>
     <button class="btn btn-purple" id="btnLoadBrain">📂 تحميل العقل</button>
-    <button class="btn btn-secondary" id="btnReset">🔄 إعادة</button>
+    <button class="btn btn-secondary" id="btnReset">🔄 مسح الكل</button>
     <button class="btn btn-green btn-share" id="btnShare">📤 مشاركة</button>
     <input type="file" id="fileInput" accept=".json">
   </div>
 </main>
+
 <section class="how-it-works" id="about">
   <h2>كيف يعمل هذا السحر؟</h2>
   <div class="steps">
-    <div class="step-card"><div class="step-icon">🧠</div><h3>1. شبكة عصبية أعمق</h3><p>تم زيادة خلايا الدماغ إلى 16 خلية، لتمكين الكائن من تتبع الأهداف المتحركة بذكاء.</p></div>
-    <div class="step-card"><div class="step-icon">🎯</div><h3>2. مطاردة الفريسة</h3><p>الهدف الآن يتحرك، مما يجبر الكائنات على تعلم التوقع والملاحقة بدلاً من مجرد المشي بخط مستقيم.</p></div>
-    <div class="step-card"><div class="step-icon">🏆</div><h3>3. وضع البطل</h3><p>بعد التطور، يمكنك عزل أذكى كائن لتراه يطارد الهدف بمفرده ويظهر مهاراته الحقيقية.</p></div>
+    <div class="step-card"><div class="step-icon">🧠</div><h3>1. شبكة عصبية</h3><p>كل كائن يمتلك "دماغاً" رقمياً يحسب اتجاه الحركة بناءً على موقعه وموقع الهدف.</p></div>
+    <div class="step-card"><div class="step-icon">🧬</div><h3>2. خوارزمية جينية</h3><p>الكائنات التي تقترب من الهدف تتزاوج، والأجيال الجديدة ترث أفضل الصفات مع طفرات للتحسين.</p></div>
+    <div class="step-card"><div class="step-icon">🏆</div><h3>3. وضع البطل</h3><p>يمكنك عزل أذكى كائن لتراه يطارد الهدف بمفرده ويظهر مهاراته الحقيقية.</p></div>
   </div>
 </section>
-<footer>صُنع بـ ❤️ باستخدام HTML & JavaScript | مفتوح المصدر</footer>
+
+<footer>صُنع بـ ❤️ | مشروعي الخاص للذكاء الاصطناعي</footer>
 <script>
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
@@ -105,7 +119,7 @@
   let targetX, targetY, startX, startY;
   let walls = [];
   const POP_SIZE = 40;
-  const LIFESPAN = 400; // زيادة العمر لمواكبة الهدف المتحرك
+  const LIFESPAN = 400;
   let speedMultiplier = 1;
   let isPaused = false;
   let population = [];
@@ -115,8 +129,9 @@
   let bestBrainEver = null;
   let championMode = false;
   let time = 0;
+  
+  let personalBestGen = parseInt(localStorage.getItem('ai_evo_best_gen')) || 1;
 
-  // شبكة عصبية أكبر (16 خلية مخفية بدلاً من 8)
   class NeuralNetwork {
     constructor(w1, b1, w2, b2) {
       this.w1 = w1 || Array.from({length: 16}, () => Array.from({length: 4}, () => (Math.random() * 2 - 1)));
@@ -182,7 +197,6 @@
       this.trail.push({x: this.x, y: this.y});
       if (this.trail.length > 40) this.trail.shift();
       
-      // اللياقة تعتمد على الاقتراب من الهدف المتحرك
       this.fitness = 1000 / (dist + 1);
       
       for (let w of walls) {
@@ -190,6 +204,25 @@
       }
       if (this.x < 0 || this.x > width || this.y < 0 || this.y > height) this.dead = true;
       if (dist < 30) { this.reached = true; this.dead = true; this.fitness += 5000; }
+    }
+  }
+
+  function loadSavedState() {
+    const savedBrain = localStorage.getItem('ai_evo_saved_brain');
+    if (savedBrain) {
+      try {
+        const data = JSON.parse(savedBrain);
+        bestBrainEver = new NeuralNetwork(data.w1, data.b1, data.w2, data.b2);
+        bestFitnessEver = data.fitness || 10000;
+        currentGen = data.gen || 1;
+        document.getElementById('statStatus').innerText = 'تم استرجاع العقل! 🧠';
+      } catch(e) { console.log("No valid saved brain."); }
+    }
+    
+    if (personalBestGen > 1) {
+      document.getElementById('personalBestBox').style.display = 'block';
+      document.getElementById('personalBestGen').innerText = personalBestGen;
+      document.getElementById('statRecord').innerText = personalBestGen;
     }
   }
 
@@ -201,17 +234,30 @@
 
   function nextGeneration() {
     population.sort((a, b) => b.fitness - a.fitness);
+    
     if (population[0].fitness > bestFitnessEver) {
       bestFitnessEver = population[0].fitness;
       bestBrainEver = new NeuralNetwork(population[0].brain.w1, population[0].brain.b1, population[0].brain.w2, population[0].brain.b2);
+      
+      const dataToSave = { gen: currentGen, fitness: bestFitnessEver, w1: bestBrainEver.w1, b1: bestBrainEver.b1, w2: bestBrainEver.w2, b2: bestBrainEver.b2 };
+      localStorage.setItem('ai_evo_saved_brain', JSON.stringify(dataToSave));
     }
+    
+    if (currentGen > personalBestGen) {
+      personalBestGen = currentGen;
+      localStorage.setItem('ai_evo_best_gen', personalBestGen);
+      document.getElementById('statRecord').innerText = personalBestGen;
+      document.getElementById('personalBestBox').style.display = 'block';
+      document.getElementById('personalBestGen').innerText = personalBestGen;
+    }
+
     let newPop = [];
     newPop.push(new Agent(bestBrainEver));
     for (let i = 1; i < POP_SIZE; i++) {
       let p1 = population[Math.floor(Math.random() * 15)];
       let p2 = population[Math.floor(Math.random() * 15)];
       let childBrain = p1.brain.crossover(p2.brain);
-      childBrain.mutate(0.15); // زيادة نسبة الطفرة قليلاً لمواكبة الهدف المتحرك
+      childBrain.mutate(0.15); 
       newPop.push(new Agent(childBrain));
     }
     population = newPop;
@@ -219,20 +265,19 @@
     frameCount = 0;
     document.getElementById('statGen').innerText = currentGen;
     document.getElementById('statBest').innerText = Math.floor(bestFitnessEver);
+    
     let status = 'يتعلم...';
     if (currentGen > 5) status = 'يتحسن 🚀';
     if (currentGen > 20) status = 'ذكي جداً 🧠';
     if (currentGen > 50) status = 'عبقري! ⭐';
     document.getElementById('statStatus').innerText = status;
     
-    // إظهار زر البطل بعد جيل 10
     if (currentGen > 10) document.getElementById('btnChampion').style.display = 'flex';
   }
 
   function update() {
     if (isPaused) return;
     
-    // تحديث موقع الهدف المتحرك
     time += 0.02;
     targetX = width/2 + Math.sin(time * 0.8) * (width * 0.35);
     targetY = height/2 + Math.cos(time * 1.2) * (height * 0.3);
@@ -243,7 +288,6 @@
       frameCount++;
       
       if (championMode && aliveCount === 0) {
-        // في وضع البطل، إذا مات البطل نعيد إحيائه
         population[0].dead = false;
         population[0].x = startX;
         population[0].y = startY;
@@ -262,7 +306,6 @@
     ctx.fillStyle = 'rgba(11, 17, 32, 0.4)';
     ctx.fillRect(0, 0, width, height);
     
-    // رسم الجدران
     ctx.fillStyle = '#334155';
     for (let w of walls) {
       ctx.fillRect(w.x, w.y, w.w, w.h);
@@ -271,7 +314,6 @@
       ctx.strokeRect(w.x, w.y, w.w, w.h);
     }
     
-    // رسم الهدف المتحرك
     ctx.beginPath();
     ctx.arc(targetX, targetY, 25, 0, Math.PI*2);
     ctx.fillStyle = '#fbbf24';
@@ -283,7 +325,6 @@
     ctx.stroke();
     ctx.shadowBlur = 0;
     
-    // رسم الكائنات
     for (let agent of population) {
       if (agent.dead) continue;
       
@@ -336,20 +377,24 @@
   });
 
   document.getElementById('btnReset').addEventListener('click', () => {
+    if(!confirm('هل أنت متأكد من مسح كل التقدم والبدء من جديد؟')) return;
     currentGen = 1; bestFitnessEver = 0; bestBrainEver = null;
     championMode = false;
-    document.getElementById('btnChampion').style.display = 'none';
+    localStorage.removeItem('ai_evo_saved_brain');
+    localStorage.removeItem('ai_evo_best_gen');
+    personalBestGen = 1;
     document.getElementById('statGen').innerText = currentGen;
     document.getElementById('statBest').innerText = '0';
     document.getElementById('statStatus').innerText = 'يتعلم...';
+    document.getElementById('personalBestBox').style.display = 'none';
+    document.getElementById('statRecord').innerText = '1';
+    document.getElementById('btnChampion').style.display = 'none';
     initPopulation();
   });
 
-  // زر عرض البطل
   document.getElementById('btnChampion').addEventListener('click', () => {
     championMode = !championMode;
     if (championMode) {
-      // إبقاء البطل فقط
       population = [new Agent(bestBrainEver)];
       document.getElementById('btnChampion').innerText = '👥 عرض الجميع';
       document.getElementById('btnChampion').classList.add('btn-primary');
@@ -415,6 +460,7 @@
     } catch (err) {}
   });
 
+  loadSavedState();
   initPopulation();
   loop();
 </script>
