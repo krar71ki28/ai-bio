@@ -3,79 +3,115 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ChatGPT المحلي (WebGPU)</title>
+<title>ChatGPT المحلي (صوت + شخصيات)</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --primary: #38bdf8; --user: #0ea5e9; --ai: #334155; }
   body { background: var(--bg); color: var(--text); font-family: 'Cairo'; height: 100vh; display: flex; flex-direction: column; margin: 0; }
-  .header { padding: 15px; background: var(--card); text-align: center; position: relative; border-bottom: 1px solid rgba(255,255,255,0.1); }
-  .header a { color: var(--primary); text-decoration: none; display: inline-block; margin-bottom: 10px; font-weight: bold; }
-  .header b { font-size: 16px; }
+  .header { padding: 10px 15px; background: var(--card); text-align: center; position: relative; border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .header a { color: var(--primary); text-decoration: none; position: absolute; left: 15px; top: 15px; font-weight: bold; }
+  .header b { font-size: 15px; }
   #status { font-size: 12px; color: #fbbf24; margin-top: 5px; }
   
-  .chat { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-  .msg { max-width: 85%; padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.6; }
+  .persona-bar { display: flex; gap: 5px; padding: 10px; background: #0b1120; overflow-x: auto; }
+  .persona-btn { padding: 5px 12px; border-radius: 15px; border: 1px solid var(--primary); background: transparent; color: var(--primary); font-family: 'Cairo'; font-size: 12px; cursor: pointer; white-space: nowrap; }
+  .persona-btn.active { background: var(--primary); color: #000; }
+
+  .chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+  .msg { max-width: 85%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.5; }
   .msg.user { align-self: flex-end; background: var(--user); border-bottom-right-radius: 4px; }
   .msg.ai { align-self: flex-start; background: var(--ai); border-bottom-left-radius: 4px; }
+  .msg.error { background: #7f1d1d; border-left: 4px solid #ef4444; }
   
-  .input-area { padding: 15px; background: var(--card); display: flex; gap: 10px; border-top: 1px solid rgba(255,255,255,0.1); }
-  .input-area input { flex: 1; padding: 12px 16px; border-radius: 24px; border: none; background: rgba(0,0,0,0.2); color: #fff; font-family: 'Cairo'; outline: none; }
-  .input-area button { padding: 0 20px; border-radius: 24px; border: none; background: var(--primary); color: #000; font-weight: bold; font-family: 'Cairo'; cursor: pointer; }
+  .input-area { padding: 10px; background: var(--card); display: flex; gap: 8px; border-top: 1px solid rgba(255,255,255,0.1); }
+  .input-area input { flex: 1; padding: 10px 14px; border-radius: 20px; border: none; background: rgba(0,0,0,0.2); color: #fff; font-family: 'Cairo'; outline: none; }
+  .input-area button { padding: 0 15px; border-radius: 20px; border: none; background: var(--primary); color: #000; font-weight: bold; cursor: pointer; }
+  .input-area button.mic { background: #a78bfa; font-size: 18px; padding: 0 18px; }
   .input-area button:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>
 </head>
 <body>
   <div class="header">
     <a href="index.html">⬅️ القائمة</a>
-    <b>🧠 ذكاء اصطناعي متقدم (WebGPU)</b>
-    <div id="status">جاري فحص توافق الهاتف...</div>
+    <b>🧠 مساعدي الصوتي المحلي</b>
+    <div id="status">جاري التحميل...</div>
+  </div>
+  
+  <!-- شريط الشخصيات -->
+  <div class="persona-bar">
+    <button class="persona-btn active" onclick="setPersona('general')">مساعد عام</button>
+    <button class="persona-btn" onclick="setPersona('coder')">مبرمج خبير</button>
+    <button class="persona-btn" onclick="setPersona('doctor')">طبيب استشاري</button>
+    <button class="persona-btn" onclick="setPersona('poet')">شاعر عربي</button>
   </div>
   
   <div class="chat" id="chatBox">
-    <div class="msg ai">مرحباً! أنا نموذج Qwen 1.5B. أنا أذكى من النموذج السابق، وأفهم العربية جيداً. سأقوم بتحميل "دماغي" الآن (قد يستغرق بعض الوقت)، وبعدها يمكنك التحدث معي بدون إنترنت.</div>
+    <div class="msg ai">مرحباً! أنا الآن معك صوتياً. اضغط على الميكروفون (🎤) لتتحدث معي، أو اكتب رسالتك. يمكنك تغيير شخصيتي من الأعلى.</div>
   </div>
   
   <div class="input-area">
-    <input type="text" id="userInput" placeholder="اكتب رسالتك..." disabled>
+    <input type="text" id="userInput" placeholder="اكتب أو استخدم المايك..." disabled>
+    <button id="micBtn" class="mic" disabled>🎤</button>
     <button id="sendBtn" disabled>إرسال</button>
   </div>
 
-  <!-- استدعاء مكتبة WebLLM -->
   <script type="module">
     import * as webllm from "https://esm.run/@mlc-ai/web-llm";
 
     const chatBox = document.getElementById('chatBox');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
+    const micBtn = document.getElementById('micBtn');
     const status = document.getElementById('status');
 
     let engine = null;
-    let messages = [{ role: "system", content: "أنت مساعد ذكي ومفيد. أجب باللغة التي يتحدث بها المستخدم." }];
+    let currentPersona = 'general';
+    let messages = [];
+
+    const personas = {
+      general: "أنت مساعد ذكي ومفيد. أجب باللغة العربية بأسلوب ودود ومختصر.",
+      coder: "أنت مبرمج كمبيوتر خبير. أجب باللغة العربية، وإذا طُلب منك كود، اكتبه بلغة بايثون أو جافاسكريبت بشرح مبسط.",
+      doctor: "أنت طبيب استشاري. أجب باللغة العربية بأسلوب طبي دقيق، ولكن ذكر دائماً أنك ذكاء اصطناعي وليس بديلاً عن الطبيب البشري.",
+      poet: "أنت شاعر عربي فصيح (مثل المتنبي). أجب باللغة العربية الفصحى وبأسلوب شعري بليغ."
+    };
+
+    window.setPersona = function(type) {
+      currentPersona = type;
+      document.querySelectorAll('.persona-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      messages = [{ role: "system", content: personas[type] }];
+      addMessage("تم تغيير الشخصية. أنا الآن: " + event.target.innerText, "ai");
+      
+      // إعادة تعيين محرك الحوار ليتقبل الشخصية الجديدة
+      if (engine) {
+        engine.reload(messages); 
+      }
+    };
 
     async function initAI() {
       try {
-        // استخدام نموذج Qwen 1.5B (حجم صغير، ذكاء عالي، يدعم العربية)
         const selectedModel = "Qwen2-1.5B-Instruct-q4f16_1-MLC";
+        status.innerText = `جاري التحميل...`;
         
-        status.innerText = `جاري تحميل النموذج (${selectedModel})...`;
-        
-        // إنشاء المحرك باستخدام WebGPU
         engine = await webllm.CreateMLCEngine(selectedModel, {
-          initProgressCallback: (progress) => {
-            status.innerText = progress.text;
-          }
+          initProgressCallback: (progress) => { status.innerText = progress.text; }
         });
+
+        // 🌟 الحل السحري: تقليل حجم الذاكرة لحماية الهاتف من الانهيار
+        engine.setContextWindowSize(1024); // كان 4096
 
         status.innerText = "✅ جاهز (يعمل بدون إنترنت)";
         status.style.color = "#10b981";
         userInput.disabled = false;
         sendBtn.disabled = false;
-        userInput.focus();
+        micBtn.disabled = false;
+        
+        messages.push({ role: "system", content: personas[currentPersona] });
       } catch (error) {
-        status.innerText = "❌ متصفحك لا يدعم WebGPU أو فشل التحميل.";
-        status.style.color = "#ef4444";
-        addMessage("عذراً، هذا المتصفح لا يدعم WebGPU اللازم لتشغيل النموذج. جرب استخدام Google Chrome على الأندرويد.", "ai");
+        status.innerText = "❌ فشل التحميل";
+        addMessage("فشل تشغيل النموذج: " + error.message, "error");
       }
     }
 
@@ -87,6 +123,7 @@
       userInput.value = "";
       userInput.disabled = true;
       sendBtn.disabled = true;
+      micBtn.disabled = true;
 
       const loadingDiv = document.createElement('div');
       loadingDiv.className = 'msg ai';
@@ -97,10 +134,12 @@
       try {
         messages.push({ role: "user", content: text });
         
-        // إرسال الطلب للنموذج
+        // حماية الذاكرة: الاحتفاظ بآخر 6 رسائل فقط إذا كانت المحادثة طويلة
+        if (messages.length > 8) messages = [messages[0], ...messages.slice(-6)];
+
         const response = await engine.chat.completions.create({
           messages: messages,
-          max_tokens: 512,
+          max_tokens: 150,
           temperature: 0.7
         });
 
@@ -109,12 +148,22 @@
         
         loadingDiv.remove();
         addMessage(reply, "ai");
+        
+        // 🔊 نطق الرد بالصوت
+        speakText(reply);
+        
       } catch (error) {
         loadingDiv.remove();
-        addMessage("حدث خطأ أثناء التفكير: " + error.message, "ai");
+        // 🌟 معالجة خطأ كرت الشاشة
+        if (error.message.includes("GPUBuffer") || error.message.includes("lost")) {
+          addMessage("⚠️ توقف كرت الشاشة (قد يكون الهاتف ساخناً أو قفلت الشاشة). قم بتحديث الصفحة (Refresh) وسأعود فوراً.", "error");
+        } else {
+          addMessage("حدث خطأ: " + error.message, "error");
+        }
       } finally {
         userInput.disabled = false;
         sendBtn.disabled = false;
+        micBtn.disabled = false;
         userInput.focus();
       }
     }
@@ -127,15 +176,53 @@
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    sendBtn.addEventListener('click', sendMessage);
-    userInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') sendMessage();
+    // 🔊 دالة النطق الصوتي (Text-to-Speech)
+    function speakText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel(); // إيقاف أي نطق سابق
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'ar-SA'; // اللغة العربية
+        utterance.rate = 1.0;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    // 🎤 دالة التعرف على الصوت (Speech-to-Text)
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.lang = 'ar-SA';
+      recognition.interimResults = false;
+      
+      recognition.onstart = () => {
+        micBtn.style.background = '#ef4444'; // أحمر أثناء التسجيل
+        userInput.placeholder = "جاري الاستماع...";
+      };
+      
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        userInput.value = transcript;
+        sendMessage(); // إرسال تلقائي بعد التحدث
+      };
+      
+      recognition.onend = () => {
+        micBtn.style.background = '#a78bfa'; // عودة للون البنفسجي
+        userInput.placeholder = "اكتب أو استخدم المايك...";
+      };
+    }
+
+    micBtn.addEventListener('click', () => {
+      if (recognition) recognition.start();
+      else alert("متصفحك لا يدعم الميكروفون.");
     });
 
-    // فحص دعم WebGPU
+    sendBtn.addEventListener('click', sendMessage);
+    userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
     if (!navigator.gpu) {
-      status.innerText = "⚠️ WebGPU غير مدعوم. يرجى استخدام Chrome حديث.";
-      status.style.color = "#fbbf24";
+      status.innerText = "⚠️ WebGPU غير مدعوم.";
     } else {
       initAI();
     }
