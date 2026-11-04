@@ -3,39 +3,32 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Quantum AI - Brain Visualizer</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+<title>Ecosystem AI - Co-evolution</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦠</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <nav>
-  <div class="logo">Quantum AI 🧠</div>
+  <div class="logo">Ecosystem AI 🦠</div>
   <div class="stats-bar">
-    <div class="stat-item"><span>الجيل</span><b id="statGen">1</b></div>
-    <div class="stat-item"><span>أفضل لياقة</span><b class="gold" id="statBest">0</b></div>
+    <div class="stat-item"><span>جيل الفرائس</span><b id="statGenPrey" style="color:#10b981;">1</b></div>
+    <div class="stat-item"><span>جيل المفترسات</span><b id="statGenPred" style="color:#ef4444;">1</b></div>
     <div class="stat-item"><span>السرعة</span><b id="statSpeed">x1</b></div>
   </div>
 </nav>
 <main class="simulator-container">
   <div class="layout-grid">
-    <!-- ساحة المحاكاة -->
     <div class="canvas-wrapper">
       <canvas id="canvas"></canvas>
-      <div class="hint">💡 انقر على الشاشة لرسم جدران جديدة وتحدي الذكاء الاصطناعي!</div>
-    </div>
-    <!-- مختبر الدماغ -->
-    <div class="brain-wrapper">
-      <div class="brain-title">الدماغ العصبي للبطل</div>
-      <canvas id="brainCanvas"></canvas>
+      <div class="hint">🟢 فرائس (تهرب وتأكل) | 🔴 مفترسات (تطارد وتصطاد)</div>
     </div>
   </div>
   
   <div class="controls">
     <button class="btn btn-primary" id="btnSpeed">⏩ تسريع</button>
     <button class="btn btn-secondary" id="btnPause">⏸️ إيقاف</button>
-    <button class="btn btn-red" id="btnChampion" style="display:none;">🏆 عرض البطل</button>
-    <button class="btn btn-secondary" id="btnReset">🔄 مسح</button>
+    <button class="btn btn-secondary" id="btnReset">🔄 إعادة</button>
   </div>
 </main>
 <script src="main.js"></script>

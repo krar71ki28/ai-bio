@@ -7,24 +7,17 @@ nav { display: flex; justify-content: space-between; align-items: center; paddin
 .stat-item { text-align: center; }
 .stat-item span { display: block; font-size: 11px; color: var(--text-muted); }
 .stat-item b { font-size: 18px; color: var(--primary); }
-.stat-item .gold { color: var(--accent); }
-.simulator-container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
-.layout-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 15px; }
-.canvas-wrapper { position: relative; width: 100%; height: 65vh; background: #0b1120; border-radius: 20px; overflow: hidden; border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-.brain-wrapper { position: relative; width: 100%; height: 65vh; background: #0b1120; border-radius: 20px; overflow: hidden; border: 2px solid rgba(167, 139, 250, 0.3); display: flex; flex-direction: column; }
-.brain-title { text-align: center; padding: 10px; background: rgba(167, 139, 250, 0.1); color: #a78bfa; font-weight: bold; font-size: 14px; }
-#brainCanvas { width: 100%; flex: 1; }
+.simulator-container { max-width: 900px; margin: 20px auto; padding: 0 15px; }
+.layout-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+.canvas-wrapper { position: relative; width: 100%; height: 70vh; background: #0b1120; border-radius: 20px; overflow: hidden; border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
 canvas { display: block; width: 100%; height: 100%; }
-.hint { position: absolute; bottom: 10px; left: 10px; font-size: 12px; color: #94a3b8; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 8px; }
+.hint { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #fff; background: rgba(0,0,0,0.7); padding: 8px 15px; border-radius: 20px; white-space: nowrap; }
 .controls { display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
 .btn { padding: 12px 20px; border: none; border-radius: 12px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; transition: 0.2s; }
 .btn:active { transform: scale(0.95); }
 .btn-primary { background: var(--primary); color: #000; }
 .btn-secondary { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
-.btn-red { background: var(--danger); color: #fff; }
-@media (max-width: 900px) {
-  .layout-grid { grid-template-columns: 1fr; }
-  .brain-wrapper { height: 35vh; }
+@media (max-width: 768px) {
   .controls { display: grid; grid-template-columns: 1fr 1fr; }
   .btn { width: 100%; }
   .stats-bar { flex-direction: column; gap: 5px; padding: 10px; }

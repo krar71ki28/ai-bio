@@ -1,177 +1,181 @@
 let width = 800, height = 600;
-let walls = [];
-let target = { x: 0, y: 0 };
-let start = { x: 0, y: 0 };
-let population = [];
-let currentGen = 1;
+let preys = [], preds = [], food = [];
+let currentGenPrey = 1, currentGenPred = 1;
 let speedMultiplier = 1;
 let isPaused = false;
-let championMode = false;
-let bestBrainEver = null;
-let bestFitnessEver = 0;
 let time = 0;
-let frameCount = 0;
-let stagnationFrames = 0;
-let lastBestFitness = 0;
-let mutationRate = 0.1;
 
-const POP_SIZE = 50;
-const LIFESPAN = 300;
-const INPUTS = 8;
-const HIDDEN1 = 32;
-const HIDDEN2 = 16;
+const POP_SIZE = 40;
+const LIFESPAN = 400;
+const INPUTS_PREY = 6; // أقرب مفترس، أقرب طعام، 4 أشعة ليزر
+const INPUTS_PRED = 6; // أقرب فريسة، 4 أشعة ليزر، سرعته
+const HIDDEN = 16;
 const OUTPUTS = 2;
 
-function castRay(x, y, angle, maxDist) {
-  let dx = Math.cos(angle), dy = Math.sin(angle);
-  let dist = maxDist;
-  for (let w of walls) {
-    let tmin = (w.x - x) / dx, tmax = (w.x + w.w - x) / dx;
-    if (tmin > tmax) [tmin, tmax] = [tmax, tmin];
-    let tymin = (w.y - y) / dy, tymax = (w.y + w.h - y) / dy;
-    if (tymin > tymax) [tymin, tymax] = [tymax, tymin];
-    if ((tmin > tymax) || (tymin > tmax)) continue;
-    if (tymin > tmin) tmin = tymin;
-    if (tymax < tmax) tmax = tymax;
-    if (tmin < dist && tmin > 0) dist = tmin;
-  }
-  if (dx > 0) dist = Math.min(dist, (width - x) / dx);
-  if (dx < 0) dist = Math.min(dist, (0 - x) / dx);
-  if (dy > 0) dist = Math.min(dist, (height - y) / dy);
-  if (dy < 0) dist = Math.min(dist, (0 - y) / dy);
-  return dist;
-}
-
+// شبكة عصبية مبسطة (طبقة مخفية واحدة لتسريع الحسابات للكائنات المتعددة)
 class NeuralNetwork {
-  constructor(w1, b1, w2, b2, w3, b3) {
-    this.w1 = w1 || Array.from({length: HIDDEN1}, () => Array.from({length: INPUTS}, () => (Math.random() * 2 - 1)));
-    this.b1 = b1 || Array.from({length: HIDDEN1}, () => (Math.random() * 2 - 1));
-    this.w2 = w2 || Array.from({length: HIDDEN2}, () => Array.from({length: HIDDEN1}, () => (Math.random() * 2 - 1)));
-    this.b2 = b2 || Array.from({length: HIDDEN2}, () => (Math.random() * 2 - 1));
-    this.w3 = w3 || Array.from({length: OUTPUTS}, () => Array.from({length: HIDDEN2}, () => (Math.random() * 2 - 1)));
-    this.b3 = b3 || Array.from({length: OUTPUTS}, () => (Math.random() * 2 - 1));
+  constructor(w1, b1, w2, b2) {
+    this.w1 = w1 || Array.from({length: HIDDEN}, () => Array.from({length: INPUTS_PREY}, () => (Math.random() * 2 - 1)));
+    this.b1 = b1 || Array.from({length: HIDDEN}, () => (Math.random() * 2 - 1));
+    this.w2 = w2 || Array.from({length: OUTPUTS}, () => Array.from({length: HIDDEN}, () => (Math.random() * 2 - 1)));
+    this.b2 = b2 || Array.from({length: OUTPUTS}, () => (Math.random() * 2 - 1));
   }
   predict(inputs) {
-    let h1 = [], h2 = [], out = [];
-    for (let i = 0; i < HIDDEN1; i++) { let s = this.b1[i]; for (let j = 0; j < INPUTS; j++) s += inputs[j] * this.w1[i][j]; h1.push(Math.tanh(s)); }
-    for (let i = 0; i < HIDDEN2; i++) { let s = this.b2[i]; for (let j = 0; j < HIDDEN1; j++) s += h1[j] * this.w2[i][j]; h2.push(Math.tanh(s)); }
-    for (let i = 0; i < OUTPUTS; i++) { let s = this.b3[i]; for (let j = 0; j < HIDDEN2; j++) s += h2[j] * this.w3[i][j]; out.push(Math.tanh(s)); }
-    return { out, h1, h2 };
+    let h = [], out = [];
+    for (let i = 0; i < HIDDEN; i++) { let s = this.b1[i]; for (let j = 0; j < inputs.length; j++) s += inputs[j] * this.w1[i][j]; h.push(Math.tanh(s)); }
+    for (let i = 0; i < OUTPUTS; i++) { let s = this.b2[i]; for (let j = 0; j < HIDDEN; j++) s += h[j] * this.w2[i][j]; out.push(Math.tanh(s)); }
+    return out;
   }
   crossover(other) {
     let cw = (w, o) => w.map((row, i) => row.map((val, j) => Math.random() > 0.5 ? val : o[i][j]));
     let cb = (b, o) => b.map((val, i) => Math.random() > 0.5 ? val : o[i]);
-    return new NeuralNetwork(cw(this.w1, other.w1), cb(this.b1, other.b1), cw(this.w2, other.w2), cb(this.b2, other.b2), cw(this.w3, other.w3), cb(this.b3, other.b3));
+    return new NeuralNetwork(cw(this.w1, other.w1), cb(this.b1, other.b1), cw(this.w2, other.w2), cb(this.b2, other.b2));
   }
   mutate(rate) {
     const mut = (v) => (Math.random() < rate) ? Math.max(-1, Math.min(1, v + (Math.random() * 2 - 1) * 0.5)) : v;
     this.w1 = this.w1.map(r => r.map(mut)); this.b1 = this.b1.map(mut);
     this.w2 = this.w2.map(r => r.map(mut)); this.b2 = this.b2.map(mut);
-    this.w3 = this.w3.map(r => r.map(mut)); this.b3 = this.b3.map(mut);
   }
 }
 
-class Agent {
+class Prey {
   constructor(brain) {
     this.brain = brain || new NeuralNetwork();
-    this.x = start.x + (Math.random() - 0.5) * 20;
-    this.y = start.y + (Math.random() - 0.5) * 20;
+    this.x = Math.random() * width; this.y = Math.random() * height;
     this.vx = 0; this.vy = 0;
-    this.dead = false;
-    this.fitness = 0; this.trail = [];
-    this.lastActivation = { h1: new Array(HIDDEN1).fill(0), h2: new Array(HIDDEN2).fill(0) };
+    this.dead = false; this.fitness = 0; this.life = 0;
   }
   update() {
     if (this.dead) return;
-    let dx = target.x - this.x, dy = target.y - this.y;
-    let dist = Math.sqrt(dx*dx + dy*dy);
-    let r1 = castRay(this.x, this.y, 0, 300), r2 = castRay(this.x, this.y, Math.PI, 300);
-    let r3 = castRay(this.x, this.y, Math.PI/2, 300), r4 = castRay(this.x, this.y, -Math.PI/2, 300);
-    
-    let inputs = [dx/width, dy/height, this.vx/5, this.vy/5, r1/300, r2/300, r3/300, r4/300];
-    let res = this.brain.predict(inputs);
-    
-    this.vx += res.out[0] * 0.8; this.vy += res.out[1] * 0.8;
-    let spd = Math.sqrt(this.vx*this.vx + this.vy*this.vy);
-    if (spd > 7) { this.vx = (this.vx / spd) * 7; this.vy = (this.vy / spd) * 7; }
-    this.x += this.vx; this.y += this.vy;
-    
-    this.trail.push({x: this.x, y: this.y});
-    if (this.trail.length > 20) this.trail.shift();
-    
-    this.fitness = 1000 / (dist + 1);
-    for (let w of walls) if (this.x > w.x && this.x < w.x + w.w && this.y > w.y && this.y < w.y + w.h) this.dead = true;
-    if (this.x < 0 || this.x > width || this.y < 0 || this.y > height) this.dead = true;
-    if (dist < 30) { this.dead = true; this.fitness += 5000; }
-    
-    return res; // نرجع نشاط الدماغ للرسم
-  }
-}
+    this.life++;
+    this.fitness += 1; // البقاء حياً يزيد اللياقة
 
-function initPopulation() {
-  population = [];
-  for (let i = 0; i < POP_SIZE; i++) population.push(new Agent(i === 0 && bestBrainEver ? bestBrainEver : null));
-  frameCount = 0; stagnationFrames = 0; lastBestFitness = 0;
-}
+    // البحث عن أقرب مفترس
+    let nearestPred = null, minDistP = Infinity;
+    for (let p of preds) {
+      if (p.dead) continue;
+      let d = Math.hypot(p.x - this.x, p.y - this.y);
+      if (d < minDistP) { minDistP = d; nearestPred = p; }
+      if (d < 15) { this.dead = true; p.fitness += 500; return; } // تم اصطياده
+    }
 
-function nextGeneration() {
-  population.sort((a, b) => b.fitness - a.fitness);
-  if (population[0].fitness > bestFitnessEver) {
-    bestFitnessEver = population[0].fitness;
-    bestBrainEver = population[0].brain;
-  }
-  let newPop = [new Agent(bestBrainEver)];
-  for (let i = 1; i < POP_SIZE; i++) {
-    let p1 = population[Math.floor(Math.random() * 20)];
-    let p2 = population[Math.floor(Math.random() * 20)];
-    let child = p1.brain.crossover(p2.brain);
-    child.mutate(mutationRate);
-    newPop.push(new Agent(child));
-  }
-  population = newPop;
-  currentGen++; frameCount = 0; stagnationFrames = 0; lastBestFitness = 0;
-  if (currentGen % 10 === 0) mutationRate = Math.min(0.5, mutationRate + 0.05);
-  else mutationRate = Math.max(0.05, mutationRate - 0.01);
-}
-
-let leaderBrainActivation = { h1: new Array(HIDDEN1).fill(0), h2: new Array(HIDDEN2).fill(0) };
-
-function updateEngine() {
-  if (isPaused) return;
-  time += 0.02;
-  target.x = width/2 + Math.sin(time * 0.8) * (width * 0.35);
-  target.y = height/2 + Math.cos(time * 1.2) * (height * 0.3);
-  
-  for (let s = 0; s < speedMultiplier; s++) {
-    let alive = 0;
-    for (let i = 0; i < population.length; i++) {
-      let agent = population[i];
-      if (!agent.dead) { 
-        let res = agent.update(); 
-        alive++;
-        if (i === 0) leaderBrainActivation = res; // تحديث دماغ البطل
+    // البحث عن أقرب طعام
+    let nearestFood = null, minDistF = Infinity;
+    for (let f of food) {
+      let d = Math.hypot(f.x - this.x, f.y - this.y);
+      if (d < minDistF) { minDistF = d; nearestFood = f; }
+      if (d < 15) { 
+        this.fitness += 100; 
+        f.x = Math.random() * width; f.y = Math.random() * height; // إعادة توليد الطعام
       }
     }
-    frameCount++;
+
+    let dxP = nearestPred ? (nearestPred.x - this.x)/width : 0;
+    let dyP = nearestPred ? (nearestPred.y - this.y)/height : 0;
+    let dxF = nearestFood ? (nearestFood.x - this.x)/width : 0;
+    let dyF = nearestFood ? (nearestFood.y - this.y)/height : 0;
+
+    let inputs = [dxP, dyP, dxF, dyF, this.vx/4, this.vy/4];
+    let out = this.brain.predict(inputs);
+
+    this.vx += out[0] * 0.5; this.vy += out[1] * 0.5;
+    let spd = Math.hypot(this.vx, this.vy);
+    if (spd > 4) { this.vx = (this.vx/spd)*4; this.vy = (this.vy/spd)*4; }
     
-    if (!championMode) {
-      if (population[0].fitness > lastBestFitness) { lastBestFitness = population[0].fitness; stagnationFrames = 0; }
-      else stagnationFrames++;
+    this.x += this.vx; this.y += this.vy;
+    if (this.x < 0 || this.x > width) this.vx *= -1;
+    if (this.y < 0 || this.y > height) this.vy *= -1;
+  }
+}
+
+class Predator {
+  constructor(brain) {
+    this.brain = brain || new NeuralNetwork();
+    this.x = Math.random() * width; this.y = Math.random() * height;
+    this.vx = 0; this.vy = 0;
+    this.dead = false; this.fitness = 0; this.life = 0;
+  }
+  update() {
+    if (this.dead) return;
+    this.life++;
+    this.fitness -= 0.5; // فقدان الطاقة مع الوقت (يجب أن يصطاد بسرعة)
+
+    // البحث عن أقرب فريسة
+    let nearestPrey = null, minDist = Infinity;
+    for (let p of preys) {
+      if (p.dead) continue;
+      let d = Math.hypot(p.x - this.x, p.y - this.y);
+      if (d < minDist) { minDist = d; nearestPrey = p; }
     }
-    if (championMode && alive === 0) { population[0].dead = false; population[0].x = start.x; population[0].y = start.y; alive = 1; }
-    if (!championMode && (alive === 0 || frameCount >= LIFESPAN || stagnationFrames > 60)) { nextGeneration(); break; }
+
+    let dx = nearestPrey ? (nearestPrey.x - this.x)/width : 0;
+    let dy = nearestPrey ? (nearestPrey.y - this.y)/height : 0;
+    
+    let inputs = [dx, dy, this.vx/4, this.vy/4, 0, 0];
+    let out = this.brain.predict(inputs);
+
+    this.vx += out[0] * 0.6; this.vy += out[1] * 0.6;
+    let spd = Math.hypot(this.vx, this.vy);
+    if (spd > 5) { this.vx = (this.vx/spd)*5; this.vy = (this.vy/spd)*5; }
+    
+    this.x += this.vx; this.y += this.vy;
+    if (this.x < 0 || this.x > width) this.vx *= -1;
+    if (this.y < 0 || this.y > height) this.vy *= -1;
+  }
+}
+
+let bestPreyBrain = null, bestPredBrain = null;
+let frameCount = 0;
+
+function evolve(population, isPrey) {
+  population.sort((a, b) => b.fitness - a.fitness);
+  let best = population[0];
+  if (isPrey) bestPreyBrain = best.brain; else bestPredBrain = best.brain;
+
+  let newPop = [isPrey ? new Prey(best.brain) : new Predator(best.brain)];
+  for (let i = 1; i < POP_SIZE; i++) {
+    let p1 = population[Math.floor(Math.random() * 10)];
+    let p2 = population[Math.floor(Math.random() * 10)];
+    let child = p1.brain.crossover(p2.brain);
+    child.mutate(0.1);
+    newPop.push(isPrey ? new Prey(child) : new Predator(child));
+  }
+  return newPop;
+}
+
+function init() {
+  preys = []; preds = []; food = [];
+  for (let i = 0; i < 15; i++) food.push({x: Math.random()*width, y: Math.random()*height});
+  for (let i = 0; i < POP_SIZE; i++) { preys.push(new Prey()); preds.push(new Predator()); }
+  currentGenPrey = 1; currentGenPred = 1;
+  frameCount = 0;
+}
+
+function update() {
+  if (isPaused) return;
+  
+  for (let s = 0; s < speedMultiplier; s++) {
+    for (let p of preys) p.update();
+    for (let p of preds) p.update();
+    frameCount++;
+
+    if (frameCount >= LIFESPAN) {
+      preys = evolve(preys, true);
+      preds = evolve(preds, false);
+      currentGenPrey++; currentGenPred++;
+      frameCount = 0;
+    }
   }
 }
 
 function getRenderData() {
   return {
     type: 'update',
-    gen: currentGen,
-    bestFitness: bestFitnessEver,
-    target: { x: target.x, y: target.y },
-    walls: walls.map(w => ({ x: w.x, y: w.y, w: w.w, h: w.h })),
-    agents: population.map((a, i) => ({ x: a.x, y: a.y, dead: a.dead, isLeader: i === 0, trail: a.trail })),
-    brain: leaderBrainActivation
+    genPrey: currentGenPrey,
+    genPred: currentGenPred,
+    food: food,
+    preys: preys.map(p => ({ x: p.x, y: p.y, dead: p.dead })),
+    preds: preds.map(p => ({ x: p.x, y: p.y, dead: p.dead }))
   };
 }
 
@@ -179,28 +183,14 @@ self.onmessage = (e) => {
   const msg = e.data;
   if (msg.type === 'init') {
     width = msg.width || 800; height = msg.height || 600;
-    start = { x: width * 0.1, y: height * 0.5 };
-    walls = [
-      { x: width/2 - 15, y: -height/2, w: 30, h: height/2 + height*0.15 },
-      { x: width/2 - 15, y: height - height*0.15, w: 30, h: height/2 }
-    ];
-    initPopulation();
+    init();
     setInterval(() => {
-      updateEngine();
+      update();
       self.postMessage(getRenderData());
-    }, 16); 
+    }, 16);
   }
-  if (msg.type === 'resize') { width = msg.width; height = msg.height; start.x = width * 0.1; start.y = height * 0.5; }
+  if (msg.type === 'resize') { width = msg.width; height = msg.height; }
   if (msg.type === 'speed') speedMultiplier = msg.value;
   if (msg.type === 'pause') isPaused = msg.value;
-  if (msg.type === 'champion') {
-    championMode = msg.value;
-    if (championMode) population = [new Agent(bestBrainEver)];
-    else initPopulation();
-  }
-  if (msg.type === 'reset') { currentGen = 1; bestFitnessEver = 0; bestBrainEver = null; initPopulation(); }
-  if (msg.type === 'addWall') {
-    // إضافة جدار بلمسة المستخدم (حجم ثابت 40x40)
-    walls.push({ x: msg.x - 20, y: msg.y - 20, w: 40, h: 40 });
-  }
+  if (msg.type === 'reset') init();
 };
