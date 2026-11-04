@@ -3,11 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>تطور المخلوقات 3D</title>
+<title>تطور الكرات الذكية 3D</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 <style>
   body { margin: 0; overflow: hidden; background: #09090b; font-family: 'Cairo', sans-serif; color: #fff; }
-  canvas { display: block; }
   #ui { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; pointer-events: none; z-index: 10; }
   .panel { background: rgba(15, 23, 42, 0.8); padding: 10px 15px; border-radius: 12px; border: 1px solid #38bdf8; font-size: 14px; backdrop-filter: blur(5px); box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
   .panel b { color: #38bdf8; font-size: 16px; }
@@ -27,19 +26,18 @@
     <button class="reset" id="btnReset">🔄 إعادة</button>
   </div>
 
-  <!-- مكتبات الرسم والفيزياء (نسخ مستقرة) -->
+  <!-- مكتبات الرسم والفيزياء -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
   
   <script>
-    // 1. إعداد الرسم (Three.js)
+    // 1. إعداد الرسم
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x09090b);
-    scene.fog = new THREE.Fog(0x09090b, 20, 60);
+    scene.fog = new THREE.Fog(0x09090b, 30, 80);
 
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
-    camera.position.set(0, 8, 15);
-    camera.lookAt(0, 0, 0);
+    camera.position.set(0, 10, -15); // الكاميرا خلف خط البداية
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -52,14 +50,11 @@
     dirLight.position.set(10, 20, 10);
     scene.add(dirLight);
 
-    // الأرضية
-    const groundGeo = new THREE.PlaneGeometry(200, 200);
-    const groundMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 1 });
-    const groundMesh = new THREE.Mesh(groundGeo, groundMat);
-    groundMesh.rotation.x = -Math.PI / 2;
-    scene.add(groundMesh);
+    // شبكة أرضية مضيئة (Grid)
+    const gridHelper = new THREE.GridHelper(200, 100, 0x38bdf8, 0x1e293b);
+    scene.add(gridHelper);
 
-    // 2. إعداد الفيزياء (Cannon.js)
+    // 2. إعداد الفيزياء
     const world = new CANNON.World();
     world.gravity.set(0, -9.82, 0);
 
@@ -79,22 +74,35 @@
         }
         return out.map(Math.tanh);
       }
-      mutate() { this.w = this.w.map(v => Math.random() < 0.1 ? v + (Math.random()*2-1)*0.5 : v); }
+      mutate() { this.w = this.w.map(v => Math.random() < 0.15 ? v + (Math.random()*2-1)*0.5 : v); }
     }
 
-    // 4. المخلوق
-    class Creature {
+    // 4. الكرة الذكية
+    class Agent {
       constructor(brain) {
         this.brain = brain || new NeuralNet();
-        this.body = new CANNON.Body({ mass: 1, shape: new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5)) });
-        this.body.position.set((Math.random()-0.5)*2, 1, 0);
+        
+        // كرة فيزيائية
+        this.body = new CANNON.Body({ mass: 1, shape: new CANNON.Sphere(0.5) });
+        this.body.position.set((Math.random()-0.5)*4, 0.5, 0); // تبدأ من نقطة الصفر
+        this.body.linearDamping = 0.5; // احتكاك
+        this.body.angularDamping = 0.5;
         world.addBody(this.body);
         
+        // شكل الكرة
         this.mesh = new THREE.Mesh(
-          new THREE.BoxGeometry(1, 1, 1),
-          new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, metalness: 0.5 })
+          new THREE.SphereGeometry(0.5, 16, 16),
+          new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x0ea5e9, emissiveIntensity: 0.5 })
         );
         scene.add(this.mesh);
+
+        // خط المسار
+        const positions = new Float32Array(100 * 3);
+        this.trailGeo = new THREE.BufferGeometry();
+        this.trailGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        this.trail = new THREE.Line(this.trailGeo, new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.5 }));
+        scene.add(this.trail);
+        this.trailCount = 0;
         
         this.dead = false;
         this.life = 0;
@@ -105,42 +113,59 @@
         if (this.dead) return;
         this.life++;
         
+        // مدخلات الشبكة: سرعة الدوران والسرعة الأمامية
         let pos = this.body.position;
-        let inputs = [this.body.velocity.y / 5, this.body.velocity.z / 5, pos.y / 10, 1];
+        let vel = this.body.velocity;
+        let angVel = this.body.angularVelocity;
+        
+        let inputs = [vel.z / 5, vel.x / 5, angVel.z / 5, 1];
         let out = this.brain.predict(inputs);
         
-        // القفز والزحف للأمام
-        if (pos.y < 0.6) {
-          this.body.velocity.y = Math.max(0, out[0]) * 8; // قفزة
-          this.body.velocity.z = (out[1] + 1) * 3;        // تقدم
-        }
+        // تطبيق قوة دفع للأمام وللدوران
+        this.body.velocity.z += out[0] * 0.5;
+        this.body.velocity.x += out[1] * 0.3;
         
+        // تحديث الرسم
         this.mesh.position.copy(pos);
         this.mesh.quaternion.copy(this.body.quaternion);
         
-        this.fitness = pos.z; 
+        // تحديث المسار
+        if (this.life % 2 === 0 && this.trailCount < 100) {
+          let arr = this.trailGeo.attributes.position.array;
+          arr[this.trailCount*3] = pos.x;
+          arr[this.trailCount*3+1] = pos.y;
+          arr[this.trailCount*3+2] = pos.z;
+          this.trailGeo.attributes.position.needsUpdate = true;
+          this.trailGeo.setDrawRange(0, this.trailCount + 1);
+          this.trailCount++;
+        }
         
-        if (pos.y < -10 || this.life > 400) {
+        this.fitness = pos.z; // اللياقة هي المسافة المقطوعة للأمام
+        
+        // الموت إذا خرجت عن المسار أو انتهى الوقت
+        if (pos.y < -5 || this.life > 600) {
           this.dead = true;
+          this.mesh.visible = false;
+          this.trail.visible = false;
         }
       }
     }
 
-    let creatures = [];
+    let agents = [];
     let bestBrain = null;
     let bestFitness = 0;
     let gen = 1;
     let speed = 1;
 
     function init() {
-      creatures.forEach(c => { scene.remove(c.mesh); world.removeBody(c.body); });
-      creatures = [];
-      for (let i = 0; i < 30; i++) creatures.push(new Creature(bestBrain));
+      agents.forEach(a => { scene.remove(a.mesh); scene.remove(a.trail); world.removeBody(a.body); });
+      agents = [];
+      for (let i = 0; i < 20; i++) agents.push(new Agent(bestBrain));
       gen = 1;
       document.getElementById('genText').innerText = gen;
     }
 
-    // 5. حلقة التحديث والرسم
+    // حلقة التحديث
     function animate() {
       requestAnimationFrame(animate);
       
@@ -148,46 +173,46 @@
         world.step(1/60);
         
         let aliveCount = 0;
-        for (let i = 0; i < creatures.length; i++) {
-          creatures[i].update();
-          if (!creatures[i].dead) aliveCount++;
+        for (let i = 0; i < agents.length; i++) {
+          agents[i].update();
+          if (!agents[i].dead) aliveCount++;
         }
         
+        // التطور عند موت الجميع
         if (aliveCount === 0) {
-          // انتهى الجيل، لنقم بالتطور
-          creatures.sort((a, b) => b.fitness - a.fitness);
-          if (creatures[0].fitness > bestFitness) {
-            bestFitness = creatures[0].fitness;
-            bestBrain = creatures[0].brain;
+          agents.sort((a, b) => b.fitness - a.fitness);
+          if (agents[0].fitness > bestFitness) {
+            bestFitness = agents[0].fitness;
+            bestBrain = agents[0].brain;
           }
           
           let newBrains = [];
-          for (let i = 0; i < 30; i++) {
+          for (let i = 0; i < 20; i++) {
             let b = new NeuralNet();
             b.w = [...bestBrain.w];
             b.mutate();
             newBrains.push(b);
           }
           
-          creatures.forEach(c => { scene.remove(c.mesh); world.removeBody(c.body); });
+          agents.forEach(a => { scene.remove(a.mesh); scene.remove(a.trail); world.removeBody(a.body); });
           
-          creatures = [];
-          newBrains.forEach(b => creatures.push(new Creature(b)));
+          agents = [];
+          newBrains.forEach(b => agents.push(new Agent(b)));
           
           gen++;
           document.getElementById('genText').innerText = gen;
           document.getElementById('fitText').innerText = bestFitness.toFixed(1);
-          break; // اخرج من حلقة السرعة لبدء الجيل الجديد
+          break;
         }
       }
       
-      // كاميرا تتبع البطل
-      if (creatures.length > 0) {
-        let leader = creatures.reduce((prev, curr) => (prev.fitness > curr.fitness) ? prev : curr);
+      // الكاميرا تتبع أفضل كرة
+      if (agents.length > 0) {
+        let leader = agents.reduce((prev, curr) => (prev.fitness > curr.fitness) ? prev : curr);
         if (!leader.dead) {
-          camera.position.z = THREE.MathUtils.lerp(camera.position.z, leader.body.position.z + 10, 0.1);
-          camera.position.x = THREE.MathUtils.lerp(camera.position.x, leader.body.position.x, 0.1);
-          camera.lookAt(0, 1, leader.body.position.z);
+          camera.position.z = THREE.MathUtils.lerp(camera.position.z, leader.body.position.z - 10, 0.05);
+          camera.position.x = THREE.MathUtils.lerp(camera.position.x, leader.body.position.x, 0.05);
+          camera.lookAt(0, 0, leader.body.position.z + 5);
         }
       }
       
