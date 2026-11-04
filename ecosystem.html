@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ecosystem AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --primary: #38bdf8; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --muted: #94a3b8; --danger: #ef4444; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Cairo'; overflow-x: hidden; }
+  nav { display: flex; justify-content: space-between; padding: 10px 5%; background: var(--card); }
+  .logo { font-weight: 900; color: var(--primary); text-decoration: none; }
+  canvas { display: block; width: 100vw; height: 80vh; background: #0b1120; }
+  .controls { text-align: center; padding: 10px; }
+  button { padding: 10px 15px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; font-family: 'Cairo'; cursor: pointer; }
+</style>
+</head>
+<body>
+<nav><a href="index.html" class="logo">⬅️ العودة</a><span>Ecosystem AI 🦠</span></nav>
+<canvas id="canvas"></canvas>
+<div class="controls"><button id="btnReset">🔄 إعادة</button></div>
+
+<script>
+  // كود اللعبة المبسط للنسخة السريعة
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+  function resize(){ w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight*0.8; }
+  window.addEventListener('resize', resize); resize();
+  
+  let preys = Array.from({length: 20}, () => ({x: Math.random()*w, y: Math.random()*h, vx: Math.random()*2-1, vy: Math.random()*2-1, color: '#10b981'}));
+  let preds = Array.from({length: 5}, () => ({x: Math.random()*w, y: Math.random()*h, vx: Math.random()*3-1.5, vy: Math.random()*3-1.5, color: '#ef4444'}));
+  
+  function loop() {
+    ctx.fillStyle = 'rgba(11,17,32,0.3)'; ctx.fillRect(0,0,w,h);
+    
+    // تحريك الفرائس (هروب عشوائي)
+    preys.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if(p.x<0||p.x>w) p.vx*=-1; if(p.y<0||p.y>h) p.vy*=-1;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI*2); ctx.fillStyle = p.color; ctx.fill();
+    });
+    
+    // تحريك المفترسات (مطاردة)
+    preds.forEach(pred => {
+      let nearest = preys[0];
+      preys.forEach(p => { if(Math.hypot(p.x-pred.x, p.y-pred.y) < Math.hypot(nearest.x-pred.x, nearest.y-pred.y)) nearest = p; });
+      if(nearest) {
+        pred.vx += (nearest.x - pred.x) * 0.001; pred.vy += (nearest.y - pred.y) * 0.001;
+        let spd = Math.hypot(pred.vx, pred.vy); if(spd > 3) { pred.vx = pred.vx/spd*3; pred.vy = pred.vy/spd*3; }
+      }
+      pred.x += pred.vx; pred.y += pred.vy;
+      if(pred.x<0||pred.x>w) pred.vx*=-1; if(pred.y<0||pred.y>h) pred.vy*=-1;
+      ctx.beginPath(); ctx.arc(pred.x, pred.y, 7, 0, Math.PI*2); ctx.fillStyle = pred.color; ctx.fill();
+    });
+    
+    requestAnimationFrame(loop);
+  }
+  loop();
+</script>
+</body>
+</html>
