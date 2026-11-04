@@ -3,30 +3,207 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>AI Frontier Lab</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<title>تطور المخلوقات 3D</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; overflow: hidden; background: #09090b; font-family: 'Cairo', sans-serif; color: #fff; }
+  canvas { display: block; }
+  #ui { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; pointer-events: none; z-index: 10; }
+  .panel { background: rgba(15, 23, 42, 0.8); padding: 10px 15px; border-radius: 12px; border: 1px solid #38bdf8; font-size: 14px; backdrop-filter: blur(5px); box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+  .panel b { color: #38bdf8; font-size: 16px; }
+  #controls { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 10; }
+  button { padding: 12px 24px; border-radius: 12px; border: none; font-family: 'Cairo'; font-weight: bold; font-size: 14px; background: #38bdf8; color: #000; cursor: pointer; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3); transition: 0.2s; }
+  button:active { transform: scale(0.95); }
+  button.reset { background: #ef4444; color: #fff; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>🔬 مختبر الذكاء الاصطناعي المتقدم</h1>
-    <p>اختر التجربة التقنية التي تريد استكشافها:</p>
-    
-    <div class="cards">
-      <a href="creature/index.html" class="card">
-        <div class="badge">تطور فيزيائي</div>
-        <div class="icon">🦿</div>
-        <h2>المخلوقات ثلاثية الأبعاد</h2>
-        <p>شاهد مخلوقات فيزيائية تتعلم المشي والجري باستخدام الشبكات العصبية.</p>
-      </a>
-
-      <a href="fluid/index.html" class="card">
-        <div class="badge">فيزياء GPU</div>
-        <div class="icon">🌊</div>
-        <h2>محاكي السوائل التفاعلي</h2>
-        <p>حل معادلات Navier-Stokes على كرت الشاشة. المس الشاشة لصنع تموجات نيون.</p>
-      </a>
-    </div>
+  <div id="ui">
+    <div class="panel">الجيل: <b id="genText">1</b></div>
+    <div class="panel">أفضل مسافة: <b id="fitText">0</b>م</div>
   </div>
+  <div id="controls">
+    <button id="btnSpeed">⏩ السرعة: x1</button>
+    <button class="reset" id="btnReset">🔄 إعادة</button>
+  </div>
+
+  <!-- مكتبات الرسم والفيزياء (نسخ مستقرة) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+  
+  <script>
+    // 1. إعداد الرسم (Three.js)
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x09090b);
+    scene.fog = new THREE.Fog(0x09090b, 20, 60);
+
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
+    camera.position.set(0, 8, 15);
+    camera.lookAt(0, 0, 0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    document.body.appendChild(renderer.domElement);
+
+    // الإضاءة
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    dirLight.position.set(10, 20, 10);
+    scene.add(dirLight);
+
+    // الأرضية
+    const groundGeo = new THREE.PlaneGeometry(200, 200);
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 1 });
+    const groundMesh = new THREE.Mesh(groundGeo, groundMat);
+    groundMesh.rotation.x = -Math.PI / 2;
+    scene.add(groundMesh);
+
+    // 2. إعداد الفيزياء (Cannon.js)
+    const world = new CANNON.World();
+    world.gravity.set(0, -9.82, 0);
+
+    const groundBody = new CANNON.Body({ mass: 0 });
+    groundBody.addShape(new CANNON.Plane());
+    groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+    world.addBody(groundBody);
+
+    // 3. الشبكة العصبية
+    class NeuralNet {
+      constructor() { this.w = Array.from({length: 4}, () => Math.random() * 2 - 1); }
+      predict(inputs) {
+        let out = [0, 0];
+        for (let i = 0; i < inputs.length; i++) {
+          out[0] += inputs[i] * this.w[i];
+          out[1] += inputs[i] * this.w[(i+2)%4];
+        }
+        return out.map(Math.tanh);
+      }
+      mutate() { this.w = this.w.map(v => Math.random() < 0.1 ? v + (Math.random()*2-1)*0.5 : v); }
+    }
+
+    // 4. المخلوق
+    class Creature {
+      constructor(brain) {
+        this.brain = brain || new NeuralNet();
+        this.body = new CANNON.Body({ mass: 1, shape: new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5)) });
+        this.body.position.set((Math.random()-0.5)*2, 1, 0);
+        world.addBody(this.body);
+        
+        this.mesh = new THREE.Mesh(
+          new THREE.BoxGeometry(1, 1, 1),
+          new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, metalness: 0.5 })
+        );
+        scene.add(this.mesh);
+        
+        this.dead = false;
+        this.life = 0;
+        this.fitness = 0;
+      }
+      
+      update() {
+        if (this.dead) return;
+        this.life++;
+        
+        let pos = this.body.position;
+        let inputs = [this.body.velocity.y / 5, this.body.velocity.z / 5, pos.y / 10, 1];
+        let out = this.brain.predict(inputs);
+        
+        // القفز والزحف للأمام
+        if (pos.y < 0.6) {
+          this.body.velocity.y = Math.max(0, out[0]) * 8; // قفزة
+          this.body.velocity.z = (out[1] + 1) * 3;        // تقدم
+        }
+        
+        this.mesh.position.copy(pos);
+        this.mesh.quaternion.copy(this.body.quaternion);
+        
+        this.fitness = pos.z; 
+        
+        if (pos.y < -10 || this.life > 400) {
+          this.dead = true;
+        }
+      }
+    }
+
+    let creatures = [];
+    let bestBrain = null;
+    let bestFitness = 0;
+    let gen = 1;
+    let speed = 1;
+
+    function init() {
+      creatures.forEach(c => { scene.remove(c.mesh); world.removeBody(c.body); });
+      creatures = [];
+      for (let i = 0; i < 30; i++) creatures.push(new Creature(bestBrain));
+      gen = 1;
+      document.getElementById('genText').innerText = gen;
+    }
+
+    // 5. حلقة التحديث والرسم
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      for (let s = 0; s < speed; s++) {
+        world.step(1/60);
+        
+        let aliveCount = 0;
+        for (let i = 0; i < creatures.length; i++) {
+          creatures[i].update();
+          if (!creatures[i].dead) aliveCount++;
+        }
+        
+        if (aliveCount === 0) {
+          // انتهى الجيل، لنقم بالتطور
+          creatures.sort((a, b) => b.fitness - a.fitness);
+          if (creatures[0].fitness > bestFitness) {
+            bestFitness = creatures[0].fitness;
+            bestBrain = creatures[0].brain;
+          }
+          
+          let newBrains = [];
+          for (let i = 0; i < 30; i++) {
+            let b = new NeuralNet();
+            b.w = [...bestBrain.w];
+            b.mutate();
+            newBrains.push(b);
+          }
+          
+          creatures.forEach(c => { scene.remove(c.mesh); world.removeBody(c.body); });
+          
+          creatures = [];
+          newBrains.forEach(b => creatures.push(new Creature(b)));
+          
+          gen++;
+          document.getElementById('genText').innerText = gen;
+          document.getElementById('fitText').innerText = bestFitness.toFixed(1);
+          break; // اخرج من حلقة السرعة لبدء الجيل الجديد
+        }
+      }
+      
+      // كاميرا تتبع البطل
+      if (creatures.length > 0) {
+        let leader = creatures.reduce((prev, curr) => (prev.fitness > curr.fitness) ? prev : curr);
+        if (!leader.dead) {
+          camera.position.z = THREE.MathUtils.lerp(camera.position.z, leader.body.position.z + 10, 0.1);
+          camera.position.x = THREE.MathUtils.lerp(camera.position.x, leader.body.position.x, 0.1);
+          camera.lookAt(0, 1, leader.body.position.z);
+        }
+      }
+      
+      renderer.render(scene, camera);
+    }
+
+    // التحكم
+    document.getElementById('btnSpeed').onclick = (e) => {
+      speed = speed === 1 ? 5 : (speed === 5 ? 10 : 1);
+      e.target.innerText = '⏩ السرعة: x' + speed;
+    };
+    document.getElementById('btnReset').onclick = () => { bestBrain = null; bestFitness = 0; init(); };
+
+    // تشغيل
+    init();
+    animate();
+  </script>
 </body>
 </html>
