@@ -3,19 +3,15 @@ let preys = [], preds = [], food = [];
 let currentGenPrey = 1, currentGenPred = 1;
 let speedMultiplier = 1;
 let isPaused = false;
-let time = 0;
 
 const POP_SIZE = 40;
 const LIFESPAN = 400;
-const INPUTS_PREY = 6; // أقرب مفترس، أقرب طعام، 4 أشعة ليزر
-const INPUTS_PRED = 6; // أقرب فريسة، 4 أشعة ليزر، سرعته
 const HIDDEN = 16;
 const OUTPUTS = 2;
 
-// شبكة عصبية مبسطة (طبقة مخفية واحدة لتسريع الحسابات للكائنات المتعددة)
 class NeuralNetwork {
   constructor(w1, b1, w2, b2) {
-    this.w1 = w1 || Array.from({length: HIDDEN}, () => Array.from({length: INPUTS_PREY}, () => (Math.random() * 2 - 1)));
+    this.w1 = w1 || Array.from({length: HIDDEN}, () => Array.from({length: 6}, () => (Math.random() * 2 - 1)));
     this.b1 = b1 || Array.from({length: HIDDEN}, () => (Math.random() * 2 - 1));
     this.w2 = w2 || Array.from({length: OUTPUTS}, () => Array.from({length: HIDDEN}, () => (Math.random() * 2 - 1)));
     this.b2 = b2 || Array.from({length: OUTPUTS}, () => (Math.random() * 2 - 1));
@@ -43,31 +39,25 @@ class Prey {
     this.brain = brain || new NeuralNetwork();
     this.x = Math.random() * width; this.y = Math.random() * height;
     this.vx = 0; this.vy = 0;
-    this.dead = false; this.fitness = 0; this.life = 0;
+    this.dead = false; this.fitness = 0;
   }
   update() {
     if (this.dead) return;
-    this.life++;
-    this.fitness += 1; // البقاء حياً يزيد اللياقة
+    this.fitness += 1; 
 
-    // البحث عن أقرب مفترس
     let nearestPred = null, minDistP = Infinity;
     for (let p of preds) {
       if (p.dead) continue;
       let d = Math.hypot(p.x - this.x, p.y - this.y);
       if (d < minDistP) { minDistP = d; nearestPred = p; }
-      if (d < 15) { this.dead = true; p.fitness += 500; return; } // تم اصطياده
+      if (d < 15) { this.dead = true; p.fitness += 500; return; }
     }
 
-    // البحث عن أقرب طعام
     let nearestFood = null, minDistF = Infinity;
     for (let f of food) {
       let d = Math.hypot(f.x - this.x, f.y - this.y);
       if (d < minDistF) { minDistF = d; nearestFood = f; }
-      if (d < 15) { 
-        this.fitness += 100; 
-        f.x = Math.random() * width; f.y = Math.random() * height; // إعادة توليد الطعام
-      }
+      if (d < 15) { this.fitness += 100; f.x = Math.random() * width; f.y = Math.random() * height; }
     }
 
     let dxP = nearestPred ? (nearestPred.x - this.x)/width : 0;
@@ -93,14 +83,12 @@ class Predator {
     this.brain = brain || new NeuralNetwork();
     this.x = Math.random() * width; this.y = Math.random() * height;
     this.vx = 0; this.vy = 0;
-    this.dead = false; this.fitness = 0; this.life = 0;
+    this.dead = false; this.fitness = 0;
   }
   update() {
     if (this.dead) return;
-    this.life++;
-    this.fitness -= 0.5; // فقدان الطاقة مع الوقت (يجب أن يصطاد بسرعة)
+    this.fitness -= 0.5; 
 
-    // البحث عن أقرب فريسة
     let nearestPrey = null, minDist = Infinity;
     for (let p of preys) {
       if (p.dead) continue;
@@ -124,14 +112,9 @@ class Predator {
   }
 }
 
-let bestPreyBrain = null, bestPredBrain = null;
-let frameCount = 0;
-
 function evolve(population, isPrey) {
   population.sort((a, b) => b.fitness - a.fitness);
   let best = population[0];
-  if (isPrey) bestPreyBrain = best.brain; else bestPredBrain = best.brain;
-
   let newPop = [isPrey ? new Prey(best.brain) : new Predator(best.brain)];
   for (let i = 1; i < POP_SIZE; i++) {
     let p1 = population[Math.floor(Math.random() * 10)];
@@ -142,6 +125,8 @@ function evolve(population, isPrey) {
   }
   return newPop;
 }
+
+let frameCount = 0;
 
 function init() {
   preys = []; preds = []; food = [];
@@ -154,7 +139,10 @@ function init() {
 function update() {
   if (isPaused) return;
   
-  for (let s = 0; s < speedMultiplier; s++) {
+  // تحديد السرعة القصوى برمجياً بـ 100 لمنع تجميد المعالج
+  let safeSpeed = Math.min(speedMultiplier, 100);
+  
+  for (let s = 0; s < safeSpeed; s++) {
     for (let p of preys) p.update();
     for (let p of preds) p.update();
     frameCount++;
@@ -182,7 +170,8 @@ function getRenderData() {
 self.onmessage = (e) => {
   const msg = e.data;
   if (msg.type === 'init') {
-    width = msg.width || 800; height = msg.height || 600;
+    if (msg.width) width = msg.width;
+    if (msg.height) height = msg.height;
     init();
     setInterval(() => {
       update();

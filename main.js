@@ -26,11 +26,11 @@ worker.onmessage = (e) => {
 
 function draw() {
   if (!renderData) return;
-  ctx.fillStyle = 'rgba(11, 17, 32, 0.4)'; // تأثير motion blur
+  ctx.fillStyle = 'rgba(11, 17, 32, 0.6)'; // تأثير الشفافية (Motion Blur)
   ctx.fillRect(0, 0, width, height);
   
-  // رسم الطعام (أخضر باهت)
-  ctx.fillStyle = 'rgba(16, 185, 129, 0.3)';
+  // رسم الطعام
+  ctx.fillStyle = 'rgba(16, 185, 129, 0.5)';
   for (let f of renderData.food) {
     ctx.beginPath(); ctx.arc(f.x, f.y, 3, 0, Math.PI*2); ctx.fill();
   }
@@ -41,7 +41,6 @@ function draw() {
     ctx.beginPath();
     ctx.arc(prey.x, prey.y, 5, 0, Math.PI*2);
     ctx.fillStyle = '#10b981'; ctx.fill();
-    ctx.strokeStyle = 'rgba(16, 185, 129, 0.3)'; ctx.lineWidth = 1; ctx.stroke();
   }
 
   // رسم المفترسات (حمراء)
@@ -57,7 +56,8 @@ function draw() {
 }
 
 document.getElementById('btnSpeed').addEventListener('click', (e) => {
-  const speeds = [1, 5, 20, 50, 100];
+  // الحد الأقصى للسرعة هو 100 لتجنب تجميد الهاتف
+  const speeds = [1, 5, 10, 50, 100];
   let currentSpeed = parseInt(document.getElementById('statSpeed').innerText.replace('x', ''));
   let idx = speeds.indexOf(currentSpeed);
   let nextSpeed = speeds[(idx + 1) % speeds.length];
@@ -75,4 +75,5 @@ document.getElementById('btnReset').addEventListener('click', () => {
   if (confirm('هل تريد إعادة تشغيل النظام البيئي من الصفر؟')) worker.postMessage({ type: 'reset' });
 });
 
-worker.postMessage({ type: 'init' });
+// بدء التشغيل مع إرسال الأبعاد الحقيقية للشاشة
+worker.postMessage({ type: 'init', width: canvas.clientWidth || 800, height: canvas.clientHeight || 600 });
