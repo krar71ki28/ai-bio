@@ -1,5 +1,3 @@
-// هذا الملف يعمل في الخلفية (Web Worker) لتسريع العمليات الحسابية وتخفيف الحمل عن الواجهة
-
 let width = 800, height = 600;
 let walls = [];
 let target = { x: 0, y: 0 };
@@ -24,7 +22,6 @@ const HIDDEN1 = 32;
 const HIDDEN2 = 16;
 const OUTPUTS = 2;
 
-// دالة الليزر
 function castRay(x, y, angle, maxDist) {
   let dx = Math.cos(angle), dy = Math.sin(angle);
   let dist = maxDist;
@@ -59,7 +56,7 @@ class NeuralNetwork {
     for (let i = 0; i < HIDDEN1; i++) { let s = this.b1[i]; for (let j = 0; j < INPUTS; j++) s += inputs[j] * this.w1[i][j]; h1.push(Math.tanh(s)); }
     for (let i = 0; i < HIDDEN2; i++) { let s = this.b2[i]; for (let j = 0; j < HIDDEN1; j++) s += h1[j] * this.w2[i][j]; h2.push(Math.tanh(s)); }
     for (let i = 0; i < OUTPUTS; i++) { let s = this.b3[i]; for (let j = 0; j < HIDDEN2; j++) s += h2[j] * this.w3[i][j]; out.push(Math.tanh(s)); }
-    return out;
+    return { out, h1, h2 };
   }
   crossover(other) {
     let cw = (w, o) => w.map((row, i) => row.map((val, j) => Math.random() > 0.5 ? val : o[i][j]));
@@ -82,6 +79,7 @@ class Agent {
     this.vx = 0; this.vy = 0;
     this.dead = false;
     this.fitness = 0; this.trail = [];
+    this.lastActivation = { h1: new Array(HIDDEN1).fill(0), h2: new Array(HIDDEN2).fill(0) };
   }
   update() {
     if (this.dead) return;
@@ -91,9 +89,9 @@ class Agent {
     let r3 = castRay(this.x, this.y, Math.PI/2, 300), r4 = castRay(this.x, this.y, -Math.PI/2, 300);
     
     let inputs = [dx/width, dy/height, this.vx/5, this.vy/5, r1/300, r2/300, r3/300, r4/300];
-    let out = this.brain.predict(inputs);
+    let res = this.brain.predict(inputs);
     
-    this.vx += out[0] * 0.8; this.vy += out[1] * 0.8;
+    this.vx += res.out[0] * 0.8; this.vy += res.out[1] * 0.8;
     let spd = Math.sqrt(this.vx*this.vx + this.vy*this.vy);
     if (spd > 7) { this.vx = (this.vx / spd) * 7; this.vy = (this.vy / spd) * 7; }
     this.x += this.vx; this.y += this.vy;
@@ -105,6 +103,8 @@ class Agent {
     for (let w of walls) if (this.x > w.x && this.x < w.x + w.w && this.y > w.y && this.y < w.y + w.h) this.dead = true;
     if (this.x < 0 || this.x > width || this.y < 0 || this.y > height) this.dead = true;
     if (dist < 30) { this.dead = true; this.fitness += 5000; }
+    
+    return res; // نرجع نشاط الدماغ للرسم
   }
 }
 
@@ -134,19 +134,24 @@ function nextGeneration() {
   else mutationRate = Math.max(0.05, mutationRate - 0.01);
 }
 
+let leaderBrainActivation = { h1: new Array(HIDDEN1).fill(0), h2: new Array(HIDDEN2).fill(0) };
+
 function updateEngine() {
   if (isPaused) return;
   time += 0.02;
   target.x = width/2 + Math.sin(time * 0.8) * (width * 0.35);
   target.y = height/2 + Math.cos(time * 1.2) * (height * 0.3);
   
-  let wallOffset = Math.sin(time * 1.5) * (height * 0.15);
-  walls[0].y = -height/2 + wallOffset;
-  walls[1].y = height/2 + wallOffset;
-
   for (let s = 0; s < speedMultiplier; s++) {
     let alive = 0;
-    for (let agent of population) if (!agent.dead) { agent.update(); alive++; }
+    for (let i = 0; i < population.length; i++) {
+      let agent = population[i];
+      if (!agent.dead) { 
+        let res = agent.update(); 
+        alive++;
+        if (i === 0) leaderBrainActivation = res; // تحديث دماغ البطل
+      }
+    }
     frameCount++;
     
     if (!championMode) {
@@ -165,13 +170,11 @@ function getRenderData() {
     bestFitness: bestFitnessEver,
     target: { x: target.x, y: target.y },
     walls: walls.map(w => ({ x: w.x, y: w.y, w: w.w, h: w.h })),
-    agents: population.map((a, i) => ({
-      x: a.x, y: a.y, dead: a.dead, isLeader: i === 0, trail: a.trail
-    }))
+    agents: population.map((a, i) => ({ x: a.x, y: a.y, dead: a.dead, isLeader: i === 0, trail: a.trail })),
+    brain: leaderBrainActivation
   };
 }
 
-// استقبال الأوامر من الواجهة
 self.onmessage = (e) => {
   const msg = e.data;
   if (msg.type === 'init') {
@@ -185,7 +188,7 @@ self.onmessage = (e) => {
     setInterval(() => {
       updateEngine();
       self.postMessage(getRenderData());
-    }, 16); // ~60 FPS
+    }, 16); 
   }
   if (msg.type === 'resize') { width = msg.width; height = msg.height; start.x = width * 0.1; start.y = height * 0.5; }
   if (msg.type === 'speed') speedMultiplier = msg.value;
@@ -196,4 +199,8 @@ self.onmessage = (e) => {
     else initPopulation();
   }
   if (msg.type === 'reset') { currentGen = 1; bestFitnessEver = 0; bestBrainEver = null; initPopulation(); }
+  if (msg.type === 'addWall') {
+    // إضافة جدار بلمسة المستخدم (حجم ثابت 40x40)
+    walls.push({ x: msg.x - 20, y: msg.y - 20, w: 40, h: 40 });
+  }
 };
