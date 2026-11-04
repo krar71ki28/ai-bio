@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>3D Creature Evolution</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; overflow: hidden; background: #000; font-family: 'Cairo'; color: #fff; }
+  #ui { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; pointer-events: none; }
+  .panel { background: rgba(0,0,0,0.7); padding: 10px 15px; border-radius: 12px; border: 1px solid #38bdf8; font-size: 14px; backdrop-filter: blur(5px); }
+  .panel b { color: #38bdf8; }
+  #controls { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; }
+  button { padding: 12px 20px; border-radius: 10px; border: none; font-family: 'Cairo'; font-weight: bold; background: #38bdf8; color: #000; cursor: pointer; }
+  button:active { transform: scale(0.95); }
+  .back-btn { position: absolute; top: 10px; left: 10px; color: #fff; text-decoration: none; background: rgba(0,0,0,0.5); padding: 8px 15px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); pointer-events: auto; }
+</style>
+</head>
+<body>
+  <a href="../index.html" class="back-btn">⬅️ القائمة</a>
+  <div id="ui">
+    <div class="panel">الجيل: <b id="genText">1</b></div>
+    <div class="panel">أفضل مسافة: <b id="fitText">0</b>م</div>
+  </div>
+  <div id="controls">
+    <button id="btnSpeed">⏩ السرعة: x1</button>
+    <button id="btnReset">🔄 إعادة</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js"></script>
+  <script src="creature.js"></script>
+</body>
+</html>
