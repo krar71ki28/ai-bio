@@ -3,18 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>3D Walking Robot Evolution</title>
+<title>3D Robot Evolution (Mobile)</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  body { margin: 0; overflow: hidden; background: #09090b; font-family: 'Cairo', sans-serif; color: #fff; }
+  body { margin: 0; overflow: hidden; background: #09090b; font-family: 'Cairo', sans-serif; color: #fff; touch-action: none; }
   #ui { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; pointer-events: none; z-index: 10; }
-  .panel { background: rgba(15, 23, 42, 0.8); padding: 10px 15px; border-radius: 12px; border: 1px solid #38bdf8; font-size: 14px; backdrop-filter: blur(5px); box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-  .panel b { color: #38bdf8; font-size: 16px; }
-  #controls { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 10; flex-wrap: wrap; justify-content: center; }
-  button { padding: 12px 24px; border-radius: 12px; border: none; font-family: 'Cairo'; font-weight: bold; font-size: 14px; background: #38bdf8; color: #000; cursor: pointer; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3); transition: 0.2s; }
+  .panel { background: rgba(15, 23, 42, 0.8); padding: 10px 15px; border-radius: 12px; border: 1px solid #38bdf8; font-size: 13px; backdrop-filter: blur(5px); box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+  .panel b { color: #38bdf8; font-size: 15px; }
+  #controls { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10; }
+  button { padding: 10px 18px; border-radius: 10px; border: none; font-family: 'Cairo'; font-weight: bold; font-size: 13px; background: #38bdf8; color: #000; cursor: pointer; transition: 0.2s; }
   button:active { transform: scale(0.95); }
-  button.reset { background: #ef4444; color: #fff; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
-  button.cam { background: #a78bfa; color: #000; box-shadow: 0 4px 15px rgba(167, 139, 250, 0.3); }
+  button.reset { background: #ef4444; color: #fff; }
 </style>
 </head>
 <body>
@@ -24,7 +23,6 @@
   </div>
   <div id="controls">
     <button id="btnSpeed">⏩ السرعة: x1</button>
-    <button class="cam" id="btnCam">🎥 متابعة</button>
     <button class="reset" id="btnReset">🔄 إعادة</button>
   </div>
 
@@ -32,57 +30,54 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
   
   <script>
-    // 1. إعداد الرسم
+    // 1. إعداد الرسم (محسن للموبايل)
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0f172a);
     scene.fog = new THREE.FogExp2(0x0f172a, 0.02);
 
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 200);
-    camera.position.set(10, 8, -10);
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
+    camera.position.set(10, 5, -10);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    // إيقاف الـ Antialias لتسريع الهاتف
+    const renderer = new THREE.WebGLRenderer({ antialias: false });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // تقليل الدقة لتخفيف الحمل على كرت الشاشة
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); 
     document.body.appendChild(renderer.domElement);
 
-    // الإضاءة
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    scene.add(new THREE.AmbientLight(0xffffff, 0.8));
     const dirLight = new THREE.DirectionalLight(0xffffff, 1);
     dirLight.position.set(10, 20, 10);
     scene.add(dirLight);
 
-    // الأرضية
-    const groundGeo = new THREE.PlaneGeometry(1000, 1000);
-    const groundMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 1 });
+    const groundGeo = new THREE.PlaneGeometry(500, 500);
+    const groundMat = new THREE.MeshBasicMaterial({ color: 0x1e293b }); // لون مسطح لسرعة الرسم
     const groundMesh = new THREE.Mesh(groundGeo, groundMat);
     groundMesh.rotation.x = -Math.PI / 2;
-    groundMesh.position.y = -0.01;
     scene.add(groundMesh);
 
-    const gridHelper = new THREE.GridHelper(1000, 500, 0x38bdf8, 0x334155);
+    const gridHelper = new THREE.GridHelper(500, 250, 0x38bdf8, 0x334155);
     scene.add(gridHelper);
 
-    // 2. إعداد الفيزياء
+    // 2. إعداد الفيزياء (محسن)
     const world = new CANNON.World();
     world.gravity.set(0, -9.82, 0);
-    world.broadphase = new CANNON.SAPBroadphase(world); // تحسين الأداء
-    world.solver.iterations = 10; // دقة الاصطدامات
+    world.solver.iterations = 5; // تقليل الدقة لتسريع الحسابات
 
     const groundBody = new CANNON.Body({ mass: 0 });
     groundBody.addShape(new CANNON.Plane());
     groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
     world.addBody(groundBody);
 
-    // 3. الشبكة العصبية (المخ)
+    // 3. الشبكة العصبية
     class NeuralNet {
       constructor() {
-        // 8 مدخلات -> 8 خلايا مخفية -> 4 مخرجات (مفاصل)
-        this.w1 = Array.from({length: 8}, () => Array.from({length: 8}, () => Math.random() * 2 - 1));
-        this.w2 = Array.from({length: 4}, () => Array.from({length: 8}, () => Math.random() * 2 - 1));
+        this.w1 = Array.from({length: 6}, () => Array.from({length: 8}, () => Math.random() * 2 - 1));
+        this.w2 = Array.from({length: 4}, () => Array.from({length: 6}, () => Math.random() * 2 - 1));
       }
       predict(inputs) {
         let hidden = [];
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < 6; i++) {
           let sum = 0;
           for (let j = 0; j < 8; j++) sum += inputs[j] * this.w1[i][j];
           hidden.push(Math.tanh(sum));
@@ -90,7 +85,7 @@
         let out = [];
         for (let i = 0; i < 4; i++) {
           let sum = 0;
-          for (let j = 0; j < 8; j++) sum += hidden[j] * this.w2[i][j];
+          for (let j = 0; j < 6; j++) sum += hidden[j] * this.w2[i][j];
           out.push(Math.tanh(sum));
         }
         return out;
@@ -110,7 +105,6 @@
         this.meshes = [];
         this.constraints = [];
         
-        // دالة مساعدة لإنشاء جزء من الروبوت
         const createPart = (w, h, d, mass, x, y, z, color) => {
           const shape = new CANNON.Box(new CANNON.Vec3(w/2, h/2, d/2));
           const body = new CANNON.Body({ mass: mass, shape: shape });
@@ -119,7 +113,7 @@
           
           const mesh = new THREE.Mesh(
             new THREE.BoxGeometry(w, h, d),
-            new THREE.MeshStandardMaterial({ color: color, roughness: 0.4, metalness: 0.3 })
+            new THREE.MeshLambertMaterial({ color: color }) // مادة أخف من Standard
           );
           scene.add(mesh);
           
@@ -128,41 +122,27 @@
           return body;
         };
 
-        // بناء الهيكل (الجذع، الفخذين، الساقين)
-        // الجذع
         this.torso = createPart(1, 1.5, 0.5, 10, 0, 3, 0, 0x38bdf8); 
-        
-        // الرجل اليسرى
         this.lThigh = createPart(0.3, 1, 0.3, 2, -0.3, 1.8, 0, 0xa78bfa);
         this.lCalf = createPart(0.3, 1, 0.3, 1, -0.3, 0.8, 0, 0x38bdf8);
-        
-        // الرجل اليمنى
         this.rThigh = createPart(0.3, 1, 0.3, 2, 0.3, 1.8, 0, 0xa78bfa);
         this.rCalf = createPart(0.3, 1, 0.3, 1, 0.3, 0.8, 0, 0x38bdf8);
 
-        // إنشاء المفاصل (Hinges)
-        const createJoint = (bodyA, bodyB, pivotA, pivotB, axis) => {
+        const createJoint = (bodyA, bodyB, pivotA, pivotB) => {
           const joint = new CANNON.HingeConstraint(bodyA, bodyB, {
-            pivotA: new CANNON.Vec3(...pivotA),
-            pivotB: new CANNON.Vec3(...pivotB),
-            axisA: new CANNON.Vec3(...axis),
-            axisB: new CANNON.Vec3(...axis)
+            pivotA: new CANNON.Vec3(...pivotA), pivotB: new CANNON.Vec3(...pivotB),
+            axisA: new CANNON.Vec3(1, 0, 0), axisB: new CANNON.Vec3(1, 0, 0)
           });
           world.addConstraint(joint);
-          joint.enableMotor(); // تشغيل المحرك للتحكم بحركة المفصل
-          joint.setMotorMaxForce(100);
+          joint.enableMotor();
+          joint.setMotorMaxForce(50);
           this.constraints.push(joint);
         };
 
-        // ربط الورك الأيسر
-        createJoint(this.torso, this.lThigh, [-0.3, -0.75, 0], [0, 0.5, 0], [1, 0, 0]);
-        // ربط الركبة اليسرى
-        createJoint(this.lThigh, this.lCalf, [0, -0.5, 0], [0, 0.5, 0], [1, 0, 0]);
-        
-        // ربط الورك الأيمن
-        createJoint(this.torso, this.rThigh, [0.3, -0.75, 0], [0, 0.5, 0], [1, 0, 0]);
-        // ربط الركبة اليمنى
-        createJoint(this.rThigh, this.rCalf, [0, -0.5, 0], [0, 0.5, 0], [1, 0, 0]);
+        createJoint(this.torso, this.lThigh, [-0.3, -0.75, 0], [0, 0.5, 0]);
+        createJoint(this.lThigh, this.lCalf, [0, -0.5, 0], [0, 0.5, 0]);
+        createJoint(this.torso, this.rThigh, [0.3, -0.75, 0], [0, 0.5, 0]);
+        createJoint(this.rThigh, this.rCalf, [0, -0.5, 0], [0, 0.5, 0]);
 
         this.dead = false;
         this.life = 0;
@@ -176,36 +156,22 @@
         let tPos = this.torso.position;
         let tVel = this.torso.velocity;
         
-        // المدخلات للشبكة (8 مدخلات)
-        let inputs = [
-          tVel.z / 5,                  // السرعة للأمام
-          tVel.y / 5,                  // السرعة العمودية
-          this.torso.angularVelocity.x / 5, // ميلان الجذع
-          this.lThigh.angularVelocity.x / 5, // حركة الفخذ
-          this.lCalf.angularVelocity.x / 5,
-          this.rThigh.angularVelocity.x / 5,
-          this.rCalf.angularVelocity.x / 5,
-          1 // Bias
-        ];
-        
+        let inputs = [tVel.z/5, tVel.y/5, this.torso.angularVelocity.x/5, this.lThigh.angularVelocity.x/5, this.lCalf.angularVelocity.x/5, this.rThigh.angularVelocity.x/5, this.rCalf.angularVelocity.x/5, 1];
         let out = this.brain.predict(inputs);
         
-        // تطبيق سرعة المحركات على المفاصل
-        this.constraints[0].setMotorSpeed(out[0] * 10); // الورك الأيسر
-        this.constraints[1].setMotorSpeed(out[1] * 10); // الركبة اليسرى
-        this.constraints[2].setMotorSpeed(out[2] * 10); // الورك الأيمن
-        this.constraints[3].setMotorSpeed(out[3] * 10); // الركبة اليمنى
+        this.constraints[0].setMotorSpeed(out[0] * 10);
+        this.constraints[1].setMotorSpeed(out[1] * 10);
+        this.constraints[2].setMotorSpeed(out[2] * 10);
+        this.constraints[3].setMotorSpeed(out[3] * 10);
         
-        // تحديث الرسم
         for (let i = 0; i < this.parts.length; i++) {
           this.meshes[i].position.copy(this.parts[i].position);
           this.meshes[i].quaternion.copy(this.parts[i].quaternion);
         }
         
-        this.fitness = tPos.z; // المسافة المقطوعة
+        this.fitness = tPos.z;
         
-        // الموت (إذا سقط الجذع، أو نفد الوقت)
-        if (tPos.y < 1.5 || this.life > 500) {
+        if (tPos.y < 1.5 || this.life > 400) {
           this.dead = true;
           this.meshes.forEach(m => m.visible = false);
         }
@@ -218,28 +184,32 @@
       }
     }
 
+    // 5. الإعدادات
+    const POP_SIZE = 5; // 5 روبوتات فقط (بدلاً من 15)
     let robots = [];
     let bestBrain = null;
     let bestFitness = 0;
     let gen = 1;
     let speed = 1;
-    let camMode = 0;
     let maxZReached = 0;
 
     function init() {
       robots.forEach(r => r.destroy());
       robots = [];
-      for (let i = 0; i < 15; i++) robots.push(new Robot(bestBrain)); // 15 روبوت لتجنب البطء
+      for (let i = 0; i < POP_SIZE; i++) robots.push(new Robot(bestBrain));
       gen = 1;
       maxZReached = 0;
       document.getElementById('genText').innerText = gen;
-      camera.position.set(10, 5, -10);
+      camera.position.set(5, 4, -10);
     }
 
     function animate() {
       requestAnimationFrame(animate);
       
-      for (let s = 0; s < speed; s++) {
+      // تقليل الحد الأقصى للسرعة إلى 5 لحماية الهاتف
+      let safeSpeed = Math.min(speed, 5);
+
+      for (let s = 0; s < safeSpeed; s++) {
         world.step(1/60);
         
         let aliveCount = 0;
@@ -249,15 +219,12 @@
           robots[i].update();
           if (!robots[i].dead) {
             aliveCount++;
-            if (robots[i].torso.position.z > currentMaxZ) {
-              currentMaxZ = robots[i].torso.position.z;
-            }
+            if (robots[i].torso.position.z > currentMaxZ) currentMaxZ = robots[i].torso.position.z;
           }
         }
         
         if (currentMaxZ > maxZReached) maxZReached = currentMaxZ;
 
-        // التطور
         if (aliveCount === 0) {
           robots.sort((a, b) => b.fitness - a.fitness);
           if (robots[0].fitness > bestFitness) {
@@ -266,7 +233,7 @@
           }
           
           let newBrains = [];
-          for (let i = 0; i < 15; i++) {
+          for (let i = 0; i < POP_SIZE; i++) {
             let b = new NeuralNet();
             if (bestBrain) {
               b.w1 = JSON.parse(JSON.stringify(bestBrain.w1));
@@ -288,32 +255,19 @@
         }
       }
       
-      // الكاميرا
-      if (camMode === 0) {
-        camera.position.z = THREE.MathUtils.lerp(camera.position.z, maxZReached - 8, 0.05);
-        camera.position.x = THREE.MathUtils.lerp(camera.position.x, 5, 0.05);
-        camera.position.y = THREE.MathUtils.lerp(camera.position.y, 4, 0.05);
-        camera.lookAt(0, 2, maxZReached + 2);
-      } else {
-        camera.position.z = THREE.MathUtils.lerp(camera.position.z, maxZReached - 15, 0.05);
-        camera.position.x = THREE.MathUtils.lerp(camera.position.x, 0, 0.05);
-        camera.position.y = THREE.MathUtils.lerp(camera.position.y, 15, 0.05);
-        camera.lookAt(0, 0, maxZReached);
-      }
+      camera.position.z = THREE.MathUtils.lerp(camera.position.z, maxZReached - 8, 0.05);
+      camera.position.x = THREE.MathUtils.lerp(camera.position.x, 4, 0.05);
+      camera.position.y = THREE.MathUtils.lerp(camera.position.y, 4, 0.05);
+      camera.lookAt(0, 2, maxZReached + 2);
       
       renderer.render(scene, camera);
     }
 
     document.getElementById('btnSpeed').onclick = (e) => {
-      speed = speed === 1 ? 3 : (speed === 3 ? 10 : 1);
+      speed = speed === 1 ? 3 : (speed === 3 ? 5 : 1);
       e.target.innerText = '⏩ السرعة: x' + speed;
     };
     
-    document.getElementById('btnCam').onclick = (e) => {
-      camMode = camMode === 0 ? 1 : 0;
-      e.target.innerText = camMode === 0 ? '🎥 متابعة' : '🎥 جانبية';
-    };
-
     document.getElementById('btnReset').onclick = () => { bestBrain = null; bestFitness = 0; init(); };
 
     init();
