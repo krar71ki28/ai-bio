@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Ecosystem AI - Co-evolution</title>
+<title>Ecosystem AI - Professional</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦠</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
@@ -12,8 +12,8 @@
 <nav>
   <div class="logo">Ecosystem AI 🦠</div>
   <div class="stats-bar">
-    <div class="stat-item"><span>جيل الفرائس</span><b id="statGenPrey" style="color:#10b981;">1</b></div>
-    <div class="stat-item"><span>جيل المفترسات</span><b id="statGenPred" style="color:#ef4444;">1</b></div>
+    <div class="stat-item"><span>فريسة</span><b id="statGenPrey" style="color:#10b981;">1</b></div>
+    <div class="stat-item"><span>مفترس</span><b id="statGenPred" style="color:#ef4444;">1</b></div>
     <div class="stat-item"><span>السرعة</span><b id="statSpeed">x1</b></div>
   </div>
 </nav>
@@ -21,14 +21,21 @@
   <div class="layout-grid">
     <div class="canvas-wrapper">
       <canvas id="canvas"></canvas>
-      <div class="hint">🟢 فرائس (تهرب وتأكل) | 🔴 مفترسات (تطارد وتصطاد)</div>
+      <div class="hint">انقر لإضافة جدران • اسحب لرسمها</div>
+    </div>
+    <div class="brain-wrapper">
+      <div class="brain-title">الدماغ (أخضر: فريسة | أحمر: مفترس)</div>
+      <canvas id="brainCanvas"></canvas>
     </div>
   </div>
   
   <div class="controls">
     <button class="btn btn-primary" id="btnSpeed">⏩ تسريع</button>
     <button class="btn btn-secondary" id="btnPause">⏸️ إيقاف</button>
-    <button class="btn btn-secondary" id="btnReset">🔄 إعادة</button>
+    <button class="btn btn-accent" id="btnSave">💾 حفظ العقول</button>
+    <button class="btn btn-purple" id="btnLoad">📂 تحميل</button>
+    <button class="btn btn-red" id="btnReset">🔄 مسح</button>
+    <input type="file" id="fileInput" accept=".json">
   </div>
 </main>
 <script src="main.js"></script>

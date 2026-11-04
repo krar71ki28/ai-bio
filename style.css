@@ -1,24 +1,31 @@
 :root { --primary: #38bdf8; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --text-muted: #94a3b8; --accent: #fbbf24; --danger: #ef4444; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background-color: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; overflow-x: hidden; }
-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; background: rgba(15, 23, 42, 0.9); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
-.logo { font-size: 20px; font-weight: 900; color: var(--primary); }
-.stats-bar { display: flex; gap: 15px; background: var(--card); padding: 10px 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
+nav { display: flex; justify-content: space-between; align-items: center; padding: 10px 5%; background: rgba(15, 23, 42, 0.9); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
+.logo { font-size: 18px; font-weight: 900; color: var(--primary); }
+.stats-bar { display: flex; gap: 10px; background: var(--card); padding: 8px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
 .stat-item { text-align: center; }
-.stat-item span { display: block; font-size: 11px; color: var(--text-muted); }
-.stat-item b { font-size: 18px; color: var(--primary); }
-.simulator-container { max-width: 900px; margin: 20px auto; padding: 0 15px; }
-.layout-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
-.canvas-wrapper { position: relative; width: 100%; height: 70vh; background: #0b1120; border-radius: 20px; overflow: hidden; border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-canvas { display: block; width: 100%; height: 100%; }
-.hint { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #fff; background: rgba(0,0,0,0.7); padding: 8px 15px; border-radius: 20px; white-space: nowrap; }
-.controls { display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
-.btn { padding: 12px 20px; border: none; border-radius: 12px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; transition: 0.2s; }
+.stat-item span { display: block; font-size: 10px; color: var(--text-muted); }
+.stat-item b { font-size: 16px; color: var(--primary); }
+.simulator-container { max-width: 1000px; margin: 10px auto; padding: 0 10px; }
+.layout-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
+.canvas-wrapper { position: relative; width: 100%; height: 60vh; background: #0b1120; border-radius: 16px; overflow: hidden; border: 2px solid rgba(255,255,255,0.1); }
+.brain-wrapper { position: relative; width: 100%; height: 60vh; background: #0b1120; border-radius: 16px; overflow: hidden; border: 2px solid rgba(167, 139, 250, 0.3); display: flex; flex-direction: column; }
+.brain-title { text-align: center; padding: 5px; background: rgba(167, 139, 250, 0.1); color: #a78bfa; font-weight: bold; font-size: 12px; }
+canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.hint { position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #fff; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 12px; white-space: nowrap; pointer-events: none; }
+.controls { display: flex; gap: 8px; justify-content: center; margin-top: 10px; flex-wrap: wrap; padding-bottom: 20px; }
+.btn { padding: 10px 15px; border: none; border-radius: 10px; font-family: 'Cairo'; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
 .btn:active { transform: scale(0.95); }
 .btn-primary { background: var(--primary); color: #000; }
 .btn-secondary { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
-@media (max-width: 768px) {
-  .controls { display: grid; grid-template-columns: 1fr 1fr; }
-  .btn { width: 100%; }
-  .stats-bar { flex-direction: column; gap: 5px; padding: 10px; }
+.btn-accent { background: var(--accent); color: #000; }
+.btn-purple { background: #a78bfa; color: #000; }
+.btn-red { background: var(--danger); color: #fff; }
+#fileInput { display: none; }
+@media (max-width: 800px) {
+  .layout-grid { grid-template-columns: 1fr; }
+  .brain-wrapper { height: 30vh; }
+  .canvas-wrapper { height: 50vh; }
+  .controls { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
 }
