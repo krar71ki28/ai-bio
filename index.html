@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>AI Evolution | تطور الذكاء الاصطناعي</title>
-<!-- أيقونة الموقع (Favicon) على شكل دماغ 🧠 -->
+<title>AI Evolution Pro | تطور الذكاء الاصطناعي</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
@@ -35,6 +34,7 @@
   .btn-accent { background: var(--accent); color: #000; }
   .btn-purple { background: #a78bfa; color: #000; }
   .btn-green { background: #10b981; color: #fff; }
+  .btn-red { background: #ef4444; color: #fff; }
   .how-it-works { padding: 80px 20px; max-width: 900px; margin: 0 auto; text-align: center; }
   .how-it-works h2 { font-size: 28px; margin-bottom: 40px; }
   .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
@@ -46,20 +46,19 @@
   footer { text-align: center; padding: 30px; color: var(--text-muted); font-size: 14px; border-top: 1px solid rgba(255,255,255,0.05); }
   #fileInput { display: none; }
 
-  /* تحسينات مخصصة للهاتف (Mobile UI) */
   @media (max-width: 768px) {
     .hero h1 { font-size: 24px; }
     .canvas-wrapper { height: 50vh; min-height: 300px; }
     .nav-links { display: none; }
     .controls { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
     .btn { width: 100%; padding: 14px 10px; font-size: 13px; }
-    .btn-share { grid-column: span 2; } /* زر المشاركة يأخذ العرض كاملاً */
+    .btn-share { grid-column: span 2; }
   }
 </style>
 </head>
 <body>
 <nav>
-  <div class="logo">AI Evolution 🧬</div>
+  <div class="logo">AI Evolution Pro 🧬</div>
   <div class="nav-links">
     <a href="#simulator">المحاكي</a>
     <a href="#about">كيف يعمل؟</a>
@@ -67,7 +66,7 @@
 </nav>
 <header class="hero">
   <h1>شاهد <span>الذكاء الاصطناعي</span> يتطور أمام عينك</h1>
-  <p>محاكي تطوري يعتمد على الشبكات العصبية والخوارزميات الجينية. الكائنات تبدأ بلا عقل، وتتعلم تدريجياً الوصول إلى الهدف عبر الأجيال.</p>
+  <p>محاكي متطور (نسخة Pro). الشبكة العصبية أكبر، والهدف يتحرك! الكائنات تتعلم المطاردة وتجنب العوائق عبر الأجيال.</p>
 </header>
 <main class="simulator-container" id="simulator">
   <div class="canvas-wrapper">
@@ -82,19 +81,20 @@
   <div class="controls">
     <button class="btn btn-primary" id="btnSpeed">⏩ السرعة: x1</button>
     <button class="btn btn-secondary" id="btnPause">⏸️ إيقاف</button>
-    <button class="btn btn-secondary" id="btnReset">🔄 إعادة</button>
+    <button class="btn btn-red" id="btnChampion" style="display:none;">🏆 عرض البطل</button>
     <button class="btn btn-accent" id="btnSaveBrain">💾 حفظ العقل</button>
     <button class="btn btn-purple" id="btnLoadBrain">📂 تحميل العقل</button>
-    <button class="btn btn-green btn-share" id="btnShare">📤 مشاركة الموقع</button>
+    <button class="btn btn-secondary" id="btnReset">🔄 إعادة</button>
+    <button class="btn btn-green btn-share" id="btnShare">📤 مشاركة</button>
     <input type="file" id="fileInput" accept=".json">
   </div>
 </main>
 <section class="how-it-works" id="about">
   <h2>كيف يعمل هذا السحر؟</h2>
   <div class="steps">
-    <div class="step-card"><div class="step-icon">🧠</div><h3>1. الشبكة العصبية</h3><p>كل كائن يمتلك "دماغاً" رقمياً يحسب اتجاه الحركة بناءً على موقعه وموقع الهدف.</p></div>
-    <div class="step-card"><div class="step-icon">🧬</div><h3>2. الخوارزمية الجينية</h3><p>الكائنات التي تقترب من الهدف تتزاوج، والأجيال الجديدة ترث أفضل الصفات مع طفرات.</p></div>
-    <div class="step-card"><div class="step-icon">💾</div><h3>3. حفظ وتحميل العقل</h3><p>يمكنك حفظ عقل الكائن الذكي في ملف، ومشاركته مع أصدقائك، أو تحميله لاحقاً للبدء من حيث توقفت.</p></div>
+    <div class="step-card"><div class="step-icon">🧠</div><h3>1. شبكة عصبية أعمق</h3><p>تم زيادة خلايا الدماغ إلى 16 خلية، لتمكين الكائن من تتبع الأهداف المتحركة بذكاء.</p></div>
+    <div class="step-card"><div class="step-icon">🎯</div><h3>2. مطاردة الفريسة</h3><p>الهدف الآن يتحرك، مما يجبر الكائنات على تعلم التوقع والملاحقة بدلاً من مجرد المشي بخط مستقيم.</p></div>
+    <div class="step-card"><div class="step-icon">🏆</div><h3>3. وضع البطل</h3><p>بعد التطور، يمكنك عزل أذكى كائن لتراه يطارد الهدف بمفرده ويظهر مهاراته الحقيقية.</p></div>
   </div>
 </section>
 <footer>صُنع بـ ❤️ باستخدام HTML & JavaScript | مفتوح المصدر</footer>
@@ -105,7 +105,7 @@
   let targetX, targetY, startX, startY;
   let walls = [];
   const POP_SIZE = 40;
-  const LIFESPAN = 300;
+  const LIFESPAN = 400; // زيادة العمر لمواكبة الهدف المتحرك
   let speedMultiplier = 1;
   let isPaused = false;
   let population = [];
@@ -113,17 +113,20 @@
   let frameCount = 0;
   let bestFitnessEver = 0;
   let bestBrainEver = null;
+  let championMode = false;
+  let time = 0;
 
+  // شبكة عصبية أكبر (16 خلية مخفية بدلاً من 8)
   class NeuralNetwork {
     constructor(w1, b1, w2, b2) {
-      this.w1 = w1 || Array.from({length: 8}, () => Array.from({length: 4}, () => (Math.random() * 2 - 1)));
-      this.b1 = b1 || Array.from({length: 8}, () => (Math.random() * 2 - 1));
-      this.w2 = w2 || Array.from({length: 2}, () => Array.from({length: 8}, () => (Math.random() * 2 - 1)));
+      this.w1 = w1 || Array.from({length: 16}, () => Array.from({length: 4}, () => (Math.random() * 2 - 1)));
+      this.b1 = b1 || Array.from({length: 16}, () => (Math.random() * 2 - 1));
+      this.w2 = w2 || Array.from({length: 2}, () => Array.from({length: 16}, () => (Math.random() * 2 - 1)));
       this.b2 = b2 || Array.from({length: 2}, () => (Math.random() * 2 - 1));
     }
     predict(inputs) {
       let hidden = [];
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 16; i++) {
         let sum = this.b1[i];
         for (let j = 0; j < 4; j++) sum += inputs[j] * this.w1[i][j];
         hidden.push(Math.tanh(sum));
@@ -131,7 +134,7 @@
       let out = [];
       for (let i = 0; i < 2; i++) {
         let sum = this.b2[i];
-        for (let j = 0; j < 8; j++) sum += hidden[j] * this.w2[i][j];
+        for (let j = 0; j < 16; j++) sum += hidden[j] * this.w2[i][j];
         out.push(Math.tanh(sum));
       }
       return out;
@@ -166,21 +169,27 @@
       let dx = targetX - this.x;
       let dy = targetY - this.y;
       let dist = Math.sqrt(dx*dx + dy*dy);
-      let inputs = [dx / width, dy / height, this.vx / 4, this.vy / 4];
+      let inputs = [dx / width, dy / height, this.vx / 5, this.vy / 5];
       let out = this.brain.predict(inputs);
-      this.vx += out[0] * 0.5;
-      this.vy += out[1] * 0.5;
+      
+      this.vx += out[0] * 0.6;
+      this.vy += out[1] * 0.6;
+      
       let speed = Math.sqrt(this.vx*this.vx + this.vy*this.vy);
-      if (speed > 5) { this.vx = (this.vx / speed) * 5; this.vy = (this.vy / speed) * 5; }
+      if (speed > 6) { this.vx = (this.vx / speed) * 6; this.vy = (this.vy / speed) * 6; }
+      
       this.x += this.vx; this.y += this.vy;
       this.trail.push({x: this.x, y: this.y});
-      if (this.trail.length > 30) this.trail.shift();
+      if (this.trail.length > 40) this.trail.shift();
+      
+      // اللياقة تعتمد على الاقتراب من الهدف المتحرك
       this.fitness = 1000 / (dist + 1);
+      
       for (let w of walls) {
         if (this.x > w.x && this.x < w.x + w.w && this.y > w.y && this.y < w.y + w.h) this.dead = true;
       }
       if (this.x < 0 || this.x > width || this.y < 0 || this.y > height) this.dead = true;
-      if (dist < 25) { this.reached = true; this.dead = true; this.fitness += 5000; }
+      if (dist < 30) { this.reached = true; this.dead = true; this.fitness += 5000; }
     }
   }
 
@@ -202,7 +211,7 @@
       let p1 = population[Math.floor(Math.random() * 15)];
       let p2 = population[Math.floor(Math.random() * 15)];
       let childBrain = p1.brain.crossover(p2.brain);
-      childBrain.mutate(0.1);
+      childBrain.mutate(0.15); // زيادة نسبة الطفرة قليلاً لمواكبة الهدف المتحرك
       newPop.push(new Agent(childBrain));
     }
     population = newPop;
@@ -212,18 +221,39 @@
     document.getElementById('statBest').innerText = Math.floor(bestFitnessEver);
     let status = 'يتعلم...';
     if (currentGen > 5) status = 'يتحسن 🚀';
-    if (currentGen > 15) status = 'ذكي جداً 🧠';
-    if (currentGen > 30) status = 'عبقري! ⭐';
+    if (currentGen > 20) status = 'ذكي جداً 🧠';
+    if (currentGen > 50) status = 'عبقري! ⭐';
     document.getElementById('statStatus').innerText = status;
+    
+    // إظهار زر البطل بعد جيل 10
+    if (currentGen > 10) document.getElementById('btnChampion').style.display = 'flex';
   }
 
   function update() {
     if (isPaused) return;
+    
+    // تحديث موقع الهدف المتحرك
+    time += 0.02;
+    targetX = width/2 + Math.sin(time * 0.8) * (width * 0.35);
+    targetY = height/2 + Math.cos(time * 1.2) * (height * 0.3);
+
     for (let s = 0; s < speedMultiplier; s++) {
       let aliveCount = 0;
       for (let agent of population) if (!agent.dead) { agent.update(); aliveCount++; }
       frameCount++;
-      if (aliveCount === 0 || frameCount >= LIFESPAN) { nextGeneration(); break; }
+      
+      if (championMode && aliveCount === 0) {
+        // في وضع البطل، إذا مات البطل نعيد إحيائه
+        population[0].dead = false;
+        population[0].x = startX;
+        population[0].y = startY;
+        aliveCount = 1;
+      }
+      
+      if (!championMode && (aliveCount === 0 || frameCount >= LIFESPAN)) { 
+        nextGeneration(); 
+        break; 
+      }
       document.getElementById('statAlive').innerText = aliveCount;
     }
   }
@@ -231,6 +261,8 @@
   function draw() {
     ctx.fillStyle = 'rgba(11, 17, 32, 0.4)';
     ctx.fillRect(0, 0, width, height);
+    
+    // رسم الجدران
     ctx.fillStyle = '#334155';
     for (let w of walls) {
       ctx.fillRect(w.x, w.y, w.w, w.h);
@@ -238,30 +270,36 @@
       ctx.lineWidth = 2;
       ctx.strokeRect(w.x, w.y, w.w, w.h);
     }
+    
+    // رسم الهدف المتحرك
     ctx.beginPath();
-    ctx.arc(targetX, targetY, 20, 0, Math.PI*2);
+    ctx.arc(targetX, targetY, 25, 0, Math.PI*2);
     ctx.fillStyle = '#fbbf24';
     ctx.fill();
-    ctx.shadowBlur = 20;
+    ctx.shadowBlur = 25;
     ctx.shadowColor = '#fbbf24';
     ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
     ctx.stroke();
     ctx.shadowBlur = 0;
+    
+    // رسم الكائنات
     for (let agent of population) {
       if (agent.dead) continue;
+      
       if (agent.trail.length > 1) {
         ctx.beginPath();
         ctx.moveTo(agent.trail[0].x, agent.trail[0].y);
         for (let i = 1; i < agent.trail.length; i++) ctx.lineTo(agent.trail[i].x, agent.trail[i].y);
         let isLeader = (population[0] === agent && !agent.dead);
         ctx.strokeStyle = isLeader ? 'rgba(56, 189, 248, 0.8)' : 'rgba(148, 163, 184, 0.1)';
-        ctx.lineWidth = isLeader ? 3 : 1;
+        ctx.lineWidth = isLeader ? 4 : 1;
         ctx.stroke();
       }
+      
       let isLeader = (population[0] === agent && !agent.dead);
       ctx.beginPath();
-      ctx.arc(agent.x, agent.y, isLeader ? 6 : 3, 0, Math.PI*2);
+      ctx.arc(agent.x, agent.y, isLeader ? 8 : 3, 0, Math.PI*2);
       ctx.fillStyle = isLeader ? '#38bdf8' : '#64748b';
       ctx.fill();
       if (isLeader) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); }
@@ -276,9 +314,8 @@
     canvas.width = width * dpr; canvas.height = height * dpr;
     ctx.scale(dpr, dpr);
     startX = width * 0.1; startY = height * 0.5;
-    targetX = width * 0.9; targetY = height * 0.5;
     let wallThickness = width * 0.05;
-    let gap = height * 0.3;
+    let gap = height * 0.35;
     walls = [
       { x: width/2 - wallThickness/2, y: 0, w: wallThickness, h: (height - gap)/2 },
       { x: width/2 - wallThickness/2, y: (height + gap)/2, w: wallThickness, h: (height - gap)/2 }
@@ -287,33 +324,58 @@
   window.addEventListener('resize', resize); resize();
 
   document.getElementById('btnSpeed').addEventListener('click', (e) => {
-    if (speedMultiplier === 1) { speedMultiplier = 3; e.target.innerText = '⏩ السرعة: x3'; }
-    else if (speedMultiplier === 3) { speedMultiplier = 10; e.target.innerText = '⏩ السرعة: x10'; }
+    if (speedMultiplier === 1) { speedMultiplier = 5; e.target.innerText = '⏩ السرعة: x5'; }
+    else if (speedMultiplier === 5) { speedMultiplier = 20; e.target.innerText = '⏩ السرعة: x20'; }
+    else if (speedMultiplier === 20) { speedMultiplier = 50; e.target.innerText = '🚀 السرعة: x50'; }
     else { speedMultiplier = 1; e.target.innerText = '⏩ السرعة: x1'; }
   });
+
   document.getElementById('btnPause').addEventListener('click', (e) => {
     isPaused = !isPaused;
     e.target.innerText = isPaused ? '▶️ متابعة' : '⏸️ إيقاف';
   });
+
   document.getElementById('btnReset').addEventListener('click', () => {
     currentGen = 1; bestFitnessEver = 0; bestBrainEver = null;
+    championMode = false;
+    document.getElementById('btnChampion').style.display = 'none';
     document.getElementById('statGen').innerText = currentGen;
     document.getElementById('statBest').innerText = '0';
     document.getElementById('statStatus').innerText = 'يتعلم...';
     initPopulation();
   });
+
+  // زر عرض البطل
+  document.getElementById('btnChampion').addEventListener('click', () => {
+    championMode = !championMode;
+    if (championMode) {
+      // إبقاء البطل فقط
+      population = [new Agent(bestBrainEver)];
+      document.getElementById('btnChampion').innerText = '👥 عرض الجميع';
+      document.getElementById('btnChampion').classList.add('btn-primary');
+      document.getElementById('btnChampion').classList.remove('btn-red');
+    } else {
+      document.getElementById('btnChampion').innerText = '🏆 عرض البطل';
+      document.getElementById('btnChampion').classList.add('btn-red');
+      document.getElementById('btnChampion').classList.remove('btn-primary');
+      initPopulation();
+    }
+  });
+
   document.getElementById('btnSaveBrain').addEventListener('click', () => {
     if (!bestBrainEver) return alert('لم يتم تطوير عقل بعد! انتظر بضعة أجيال.');
     const data = { gen: currentGen, w1: bestBrainEver.w1, b1: bestBrainEver.b1, w2: bestBrainEver.w2, b2: bestBrainEver.b2 };
     const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = `brain_gen_${currentGen}.json`;
+    a.href = url; a.download = `smart_brain_gen_${currentGen}.json`;
     a.click(); URL.revokeObjectURL(url);
   });
+
   document.getElementById('btnLoadBrain').addEventListener('click', () => {
     document.getElementById('fileInput').click();
   });
+
   document.getElementById('fileInput').addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -327,8 +389,9 @@
         document.getElementById('statGen').innerText = currentGen;
         document.getElementById('statBest').innerText = '10000+';
         document.getElementById('statStatus').innerText = 'تم تحميل العقل! 🧠';
+        championMode = false;
         initPopulation();
-        alert('تم تحميل العقل بنجاح! الكائنات الآن تبدأ ذكية جداً.');
+        alert('تم تحميل العقل بنجاح!');
       } catch (err) {
         alert('خطأ في قراءة الملف! تأكد من أنه ملف JSON صحيح.');
       }
@@ -336,11 +399,10 @@
     reader.readAsText(file);
   });
   
-  // ميزة المشاركة
   document.getElementById('btnShare').addEventListener('click', async () => {
     const shareData = {
-      title: 'AI Evolution | تطور الذكاء الاصطناعي',
-      text: 'شاهد الذكاء الاصطناعي يتطور أمام عينك! جرب هذا المحاكي الرائع.',
+      title: 'AI Evolution Pro | تطور الذكاء الاصطناعي',
+      text: 'شاهد الذكاء الاصطناعي يتطور ويتعلم المطاردة أمام عينك! جرب هذا المحاكي الرائع.',
       url: window.location.href
     };
     try {
@@ -350,9 +412,7 @@
         await navigator.clipboard.writeText(window.location.href);
         alert('✅ تم نسخ رابط الموقع! يمكنك الآن مشاركته مع أصدقائك.');
       }
-    } catch (err) {
-      console.error('Error sharing:', err);
-    }
+    } catch (err) {}
   });
 
   initPopulation();
