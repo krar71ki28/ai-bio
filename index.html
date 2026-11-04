@@ -3,91 +3,72 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>AI Evolution Pro | مشروعي الخاص</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+<title>Quantum AI Evolution</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚛️</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  :root { --primary: #38bdf8; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --text-muted: #94a3b8; --accent: #fbbf24; }
+  :root { --primary: #38bdf8; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --text-muted: #94a3b8; --accent: #fbbf24; --danger: #ef4444; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background-color: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; line-height: 1.6; overflow-x: hidden; }
-  nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 5%; background: rgba(15, 23, 42, 0.9); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+  nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; background: rgba(15, 23, 42, 0.9); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05); }
   .logo { font-size: 20px; font-weight: 900; color: var(--primary); }
-  .nav-links a { color: var(--text-muted); text-decoration: none; margin-left: 20px; font-size: 14px; transition: 0.3s; }
-  .nav-links a:hover { color: var(--primary); }
-  .hero { text-align: center; padding: 60px 20px 40px; background: radial-gradient(circle at center, rgba(56,189,248,0.1) 0%, transparent 70%); }
-  .hero h1 { font-size: 32px; margin-bottom: 15px; font-weight: 900; }
+  .hero { text-align: center; padding: 30px 20px; background: radial-gradient(circle at center, rgba(56,189,248,0.1) 0%, transparent 70%); }
+  .hero h1 { font-size: 28px; margin-bottom: 10px; font-weight: 900; }
   .hero h1 span { color: var(--primary); }
-  .hero p { color: var(--text-muted); max-width: 600px; margin: 0 auto 30px; font-size: 16px; }
-  .simulator-container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
-  .canvas-wrapper { position: relative; width: 100%; height: 60vh; min-height: 400px; background: #0b1120; border-radius: 20px; overflow: hidden; border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+  .hero p { color: var(--text-muted); font-size: 14px; }
+  .simulator-container { max-width: 900px; margin: 0 auto; padding: 0 15px; }
+  .canvas-wrapper { position: relative; width: 100%; height: 55vh; min-height: 350px; background: #0b1120; border-radius: 20px; overflow: hidden; border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
   canvas { display: block; width: 100%; height: 100%; }
   
-  .stats-bar { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 10px; background: var(--card); border-radius: 16px; padding: 15px; margin-top: -30px; position: relative; z-index: 10; width: 90%; margin-left: auto; margin-right: auto; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+  .stats-bar { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 10px; background: var(--card); border-radius: 16px; padding: 12px; margin-top: -20px; position: relative; z-index: 10; width: 95%; margin-left: auto; margin-right: auto; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
   .stat-item { text-align: center; }
-  .stat-item span { display: block; font-size: 12px; color: var(--text-muted); }
-  .stat-item b { font-size: 20px; color: var(--primary); font-weight: 900; }
+  .stat-item span { display: block; font-size: 11px; color: var(--text-muted); }
+  .stat-item b { font-size: 18px; color: var(--primary); font-weight: 900; }
   .stat-item .gold { color: var(--accent); }
   
-  .personal-best { text-align: center; margin-top: 15px; font-size: 14px; color: #cbd5e1; background: rgba(56, 189, 248, 0.1); padding: 10px; border-radius: 12px; width: 90%; max-width: 900px; margin-left: auto; margin-right: auto; border: 1px solid rgba(56, 189, 248, 0.2); }
-  .personal-best b { color: var(--primary); }
+  .personal-best { text-align: center; margin-top: 10px; font-size: 13px; color: #cbd5e1; background: rgba(56, 189, 248, 0.1); padding: 8px; border-radius: 12px; width: 95%; max-width: 900px; margin-left: auto; margin-right: auto; border: 1px solid rgba(56, 189, 248, 0.2); }
 
-  .controls { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 20px; margin-bottom: 20px; }
-  .btn { padding: 12px 20px; border: none; border-radius: 12px; font-family: 'Cairo'; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .controls { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 15px; margin-bottom: 20px; }
+  .btn { padding: 10px 15px; border: none; border-radius: 10px; font-family: 'Cairo'; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px; }
   .btn:active { transform: scale(0.95); }
   .btn-primary { background: var(--primary); color: #000; }
   .btn-secondary { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
   .btn-accent { background: var(--accent); color: #000; }
   .btn-purple { background: #a78bfa; color: #000; }
   .btn-green { background: #10b981; color: #fff; }
-  .btn-red { background: #ef4444; color: #fff; }
+  .btn-red { background: var(--danger); color: #fff; }
   
-  .how-it-works { padding: 60px 20px 30px; max-width: 900px; margin: 0 auto; text-align: center; }
-  .how-it-works h2 { font-size: 28px; margin-bottom: 40px; }
-  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-  .step-card { background: var(--card); padding: 30px 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
-  .step-card:hover { transform: translateY(-5px); border-color: var(--primary); }
-  .step-icon { font-size: 40px; margin-bottom: 15px; }
-  .step-card h3 { font-size: 18px; margin-bottom: 10px; color: var(--primary); }
-  .step-card p { font-size: 14px; color: var(--text-muted); }
-
-  footer { text-align: center; padding: 30px; color: var(--text-muted); font-size: 14px; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 40px; }
+  footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px; }
   #fileInput { display: none; }
 
   @media (max-width: 768px) {
-    .hero h1 { font-size: 24px; }
-    .canvas-wrapper { height: 50vh; min-height: 300px; }
-    .nav-links { display: none; }
     .controls { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
-    .btn { width: 100%; padding: 14px 10px; font-size: 13px; }
+    .btn { width: 100%; }
     .btn-share { grid-column: span 2; }
   }
 </style>
 </head>
 <body>
 <nav>
-  <div class="logo">AI Evolution Deep 🧬</div>
-  <div class="nav-links">
-    <a href="#simulator">المحاكي</a>
-    <a href="#about">كيف يعمل؟</a>
-  </div>
+  <div class="logo">Quantum AI ⚛️</div>
 </nav>
 <header class="hero">
-  <h1>شاهد <span>الذكاء الاصطناعي العميق</span> يتطور</h1>
-  <p>شبكة عصبية عميقة (Deep Neural Network) بـ 192 خلية و 6 حساسات. الكائنات تتعلم المطاردة وتجنب العوائق بذكاء خارق.</p>
+  <h1>الجيل القادم من <span>الذكاء الاصطناعي</span></h1>
+  <p>شبكة عصبية عميقة + حساسات ليزر + بيئة متحركة</p>
 </header>
-<main class="simulator-container" id="simulator">
+<main class="simulator-container">
   <div class="canvas-wrapper">
     <canvas id="canvas"></canvas>
   </div>
   <div class="stats-bar">
-    <div class="stat-item"><span>الجيل الحالي</span><b id="statGen">1</b></div>
-    <div class="stat-item"><span>الكائنات الحية</span><b id="statAlive">50</b></div>
+    <div class="stat-item"><span>الجيل</span><b id="statGen">1</b></div>
+    <div class="stat-item"><span>أحياء</span><b id="statAlive">50</b></div>
     <div class="stat-item"><span>أفضل لياقة</span><b class="gold" id="statBest">0</b></div>
     <div class="stat-item"><span>الرقم القياسي</span><b id="statRecord" style="color:#a78bfa;">1</b></div>
   </div>
   
   <div class="personal-best" id="personalBestBox" style="display:none;">
-    🔥 رقمك القياسي على هذا الجهاز: <b id="personalBestGen">1</b> جيل
+    🔥 رقمك القياسي: <b id="personalBestGen">1</b> جيل
   </div>
 
   <div class="controls">
@@ -96,30 +77,19 @@
     <button class="btn btn-red" id="btnChampion" style="display:none;">🏆 عرض البطل</button>
     <button class="btn btn-accent" id="btnSaveBrain">💾 حفظ العقل</button>
     <button class="btn btn-purple" id="btnLoadBrain">📂 تحميل العقل</button>
-    <button class="btn btn-secondary" id="btnReset">🔄 مسح الكل</button>
-    <button class="btn btn-green btn-share" id="btnShare">📤 مشاركة</button>
-    <input type="file" id="fileInput" accept=".json">
+    <button class="btn btn-secondary" id="btnReset">🔄 مسح</button>
   </div>
 </main>
 
-<section class="how-it-works" id="about">
-  <h2>كيف يعمل هذا السحر؟</h2>
-  <div class="steps">
-    <div class="step-card"><div class="step-icon">🧠</div><h3>1. شبكة عصبية عميقة</h3><p>كل كائن يمتلك دماً رقمياً بطبقتين (192 خلية) و6 حساسات، ليحلل البيئة ويتخذ قرارات معقدة.</p></div>
-    <div class="step-card"><div class="step-icon">🧬</div><h3>2. خوارزمية جينية</h3><p>الكائنات التي تقترب من الهدف تتزاوج، والأجيال الجديدة ترث أفضل الصفات مع طفرات للتحسين.</p></div>
-    <div class="step-card"><div class="step-icon">🏆</div><h3>3. وضع البطل</h3><p>يمكنك عزل أذكى كائن لتراه يطارد الهدف بمفرده ويظهر مهاراته الحقيقية.</p></div>
-  </div>
-</section>
-
-<footer>صُنع بـ ❤️ | مشروعي الخاص للذكاء الاصطناعي</footer>
+<footer>صُنع بـ ⚛️ | خوارزميات تطورية عميقة</footer>
 <script>
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
   let width, height;
   let targetX, targetY, startX, startY;
   let walls = [];
-  const POP_SIZE = 50; // زيادة عدد الكائنات
-  const LIFESPAN = 250;
+  const POP_SIZE = 50;
+  const LIFESPAN = 300;
   let speedMultiplier = 1;
   let isPaused = false;
   let population = [];
@@ -131,60 +101,82 @@
   let time = 0;
   let stagnationFrames = 0;
   let lastBestFitness = 0;
-  
-  // هيكل الشبكة العميقة
-  const INPUTS = 6; // dx, dy, vx, vy, dist to wall 1, dist to wall 2
-  const HIDDEN1 = 128;
-  const HIDDEN2 = 64;
+  let mutationRate = 0.1;
+  let particles = [];
+
+  // 8 مدخلات: dx, dy, vx, vy + 4 أشعة ليزر (يمين، يسار، أعلى، أسفل)
+  const INPUTS = 8;
+  const HIDDEN1 = 32;
+  const HIDDEN2 = 16;
   const OUTPUTS = 2;
 
-  let personalBestGen = parseInt(localStorage.getItem('ai_evo_best_gen')) || 1;
+  let personalBestGen = parseInt(localStorage.getItem('quantum_ai_best_gen')) || 1;
+
+  // دالة إطلاق الليزر (Raycasting) لحساب المسافة للجدار
+  function castRay(x, y, angle, maxDist) {
+    let dx = Math.cos(angle);
+    let dy = Math.sin(angle);
+    let dist = maxDist;
+    for (let w of walls) {
+      let tmin = (w.x - x) / dx;
+      let tmax = (w.x + w.w - x) / dx;
+      if (tmin > tmax) { let tmp = tmin; tmin = tmax; tmax = tmp; }
+      let tymin = (w.y - y) / dy;
+      let tymax = (w.y + w.h - y) / dy;
+      if (tymin > tymax) { let tmp = tymin; tymin = tymax; tymax = tmp; }
+      if ((tmin > tymax) || (tymin > tmax)) continue;
+      if (tymin > tmin) tmin = tymin;
+      if (tymax < tmax) tmax = tymax;
+      if (tmin < dist && tmin > 0) dist = tmin;
+    }
+    // ارتداد عن حواف الشاشة
+    if (dx > 0) dist = Math.min(dist, (width - x) / dx);
+    if (dx < 0) dist = Math.min(dist, (0 - x) / dx);
+    if (dy > 0) dist = Math.min(dist, (height - y) / dy);
+    if (dy < 0) dist = Math.min(dist, (0 - y) / dy);
+    return dist;
+  }
 
   class NeuralNetwork {
     constructor(w1, b1, w2, b2, w3, b3) {
       this.w1 = w1 || Array.from({length: HIDDEN1}, () => Array.from({length: INPUTS}, () => (Math.random() * 2 - 1)));
       this.b1 = b1 || Array.from({length: HIDDEN1}, () => (Math.random() * 2 - 1));
-      
       this.w2 = w2 || Array.from({length: HIDDEN2}, () => Array.from({length: HIDDEN1}, () => (Math.random() * 2 - 1)));
       this.b2 = b2 || Array.from({length: HIDDEN2}, () => (Math.random() * 2 - 1));
-      
       this.w3 = w3 || Array.from({length: OUTPUTS}, () => Array.from({length: HIDDEN2}, () => (Math.random() * 2 - 1)));
       this.b3 = b3 || Array.from({length: OUTPUTS}, () => (Math.random() * 2 - 1));
     }
     
     predict(inputs) {
-      // الطبقة المخفية الأولى
-      let hidden1 = [];
+      let h1 = [];
       for (let i = 0; i < HIDDEN1; i++) {
         let sum = this.b1[i];
         for (let j = 0; j < INPUTS; j++) sum += inputs[j] * this.w1[i][j];
-        hidden1.push(Math.tanh(sum));
+        h1.push(Math.tanh(sum));
       }
-      // الطبقة المخفية الثانية
-      let hidden2 = [];
+      let h2 = [];
       for (let i = 0; i < HIDDEN2; i++) {
         let sum = this.b2[i];
-        for (let j = 0; j < HIDDEN1; j++) sum += hidden1[j] * this.w2[i][j];
-        hidden2.push(Math.tanh(sum));
+        for (let j = 0; j < HIDDEN1; j++) sum += h1[j] * this.w2[i][j];
+        h2.push(Math.tanh(sum));
       }
-      // طبقة المخرجات
       let out = [];
       for (let i = 0; i < OUTPUTS; i++) {
         let sum = this.b3[i];
-        for (let j = 0; j < HIDDEN2; j++) sum += hidden2[j] * this.w3[i][j];
+        for (let j = 0; j < HIDDEN2; j++) sum += h2[j] * this.w3[i][j];
         out.push(Math.tanh(sum));
       }
       return out;
     }
     
     crossover(other) {
-      let w1 = this.w1.map((row, i) => row.map((val, j) => Math.random() > 0.5 ? val : other.w1[i][j]));
-      let b1 = this.b1.map((val, i) => Math.random() > 0.5 ? val : other.b1[i]);
-      let w2 = this.w2.map((row, i) => row.map((val, j) => Math.random() > 0.5 ? val : other.w2[i][j]));
-      let b2 = this.b2.map((val, i) => Math.random() > 0.5 ? val : other.b2[i]);
-      let w3 = this.w3.map((row, i) => row.map((val, j) => Math.random() > 0.5 ? val : other.w3[i][j]));
-      let b3 = this.b3.map((val, i) => Math.random() > 0.5 ? val : other.b3[i]);
-      return new NeuralNetwork(w1, b1, w2, b2, w3, b3);
+      let cw = (w) => w.map((row, i) => row.map((val, j) => Math.random() > 0.5 ? val : other[i][j]));
+      let cb = (b, o) => b.map((val, i) => Math.random() > 0.5 ? val : o[i]);
+      return new NeuralNetwork(
+        cw(this.w1).map((r, i) => r.map((v, j) => Math.random() > 0.5 ? v : other.w1[i][j])), cb(this.b1, other.b1),
+        cw(this.w2).map((r, i) => r.map((v, j) => Math.random() > 0.5 ? v : other.w2[i][j])), cb(this.b2, other.b2),
+        cw(this.w3).map((r, i) => r.map((v, j) => Math.random() > 0.5 ? v : other.w3[i][j])), cb(this.b3, other.b3)
+      );
     }
     
     mutate(rate) {
@@ -206,7 +198,9 @@
       this.vx = 0; this.vy = 0;
       this.dead = false; this.reached = false;
       this.fitness = 0; this.trail = [];
+      this.lidarRays = [];
     }
+    
     update() {
       if (this.dead) return;
       
@@ -214,56 +208,76 @@
       let dy = targetY - this.y;
       let dist = Math.sqrt(dx*dx + dy*dy);
       
-      // حساب المسافة للجدران
-      let wallDist1 = 1.0;
-      let wallDist2 = 1.0;
-      for (let w of walls) {
-        let cx = Math.max(w.x, Math.min(this.x, w.x + w.w));
-        let cy = Math.max(w.y, Math.min(this.y, w.y + w.h));
-        let d = Math.sqrt((this.x - cx)**2 + (this.y - cy)**2);
-        if (cx === w.x) wallDist1 = Math.min(wallDist1, d / width);
-        else wallDist2 = Math.min(wallDist2, d / width);
-      }
+      // إطلاق 4 أشعة ليزر
+      let r1 = castRay(this.x, this.y, 0, 300); // يمين
+      let r2 = castRay(this.x, this.y, Math.PI, 300); // يسار
+      let r3 = castRay(this.x, this.y, Math.PI/2, 300); // أسفل
+      let r4 = castRay(this.x, this.y, -Math.PI/2, 300); // أعلى
       
-      // 6 مدخلات
-      let inputs = [dx / width, dy / height, this.vx / 5, this.vy / 5, wallDist1, wallDist2];
+      this.lidarRays = [
+        {x: this.x + r1, y: this.y},
+        {x: this.x - r2, y: this.y},
+        {x: this.x, y: this.y + r3},
+        {x: this.x, y: this.y - r4}
+      ];
+      
+      // المدخلات للشبكة (مُطبعة بين -1 و 1)
+      let inputs = [
+        dx / width, dy / height, 
+        this.vx / 5, this.vy / 5,
+        r1 / 300, r2 / 300, r3 / 300, r4 / 300
+      ];
+      
       let out = this.brain.predict(inputs);
       
-      this.vx += out[0] * 0.6;
-      this.vy += out[1] * 0.6;
+      this.vx += out[0] * 0.8;
+      this.vy += out[1] * 0.8;
       
       let speed = Math.sqrt(this.vx*this.vx + this.vy*this.vy);
-      if (speed > 6) { this.vx = (this.vx / speed) * 6; this.vy = (this.vy / speed) * 6; }
+      if (speed > 7) { this.vx = (this.vx / speed) * 7; this.vy = (this.vy / speed) * 7; }
       
       this.x += this.vx; this.y += this.vy;
       this.trail.push({x: this.x, y: this.y});
-      if (this.trail.length > 40) this.trail.shift();
+      if (this.trail.length > 20) this.trail.shift();
       
       this.fitness = 1000 / (dist + 1);
       
+      // اصطدام
       for (let w of walls) {
         if (this.x > w.x && this.x < w.x + w.w && this.y > w.y && this.y < w.y + w.h) this.dead = true;
       }
       if (this.x < 0 || this.x > width || this.y < 0 || this.y > height) this.dead = true;
-      if (dist < 30) { this.reached = true; this.dead = true; this.fitness += 5000; }
+      
+      if (dist < 30) { 
+        this.reached = true; 
+        this.dead = true; 
+        this.fitness += 5000;
+        // تأثير الانفجار
+        if (championMode || speedMultiplier === 1) {
+          for(let i=0; i<10; i++) {
+            particles.push({
+              x: this.x, y: this.y,
+              vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5,
+              life: 1, color: '#fbbf24'
+            });
+          }
+        }
+      }
     }
   }
 
   function loadSavedState() {
-    const savedBrain = localStorage.getItem('ai_evo_saved_brain');
-    if (savedBrain) {
+    const saved = localStorage.getItem('quantum_ai_brain');
+    if (saved) {
       try {
-        const data = JSON.parse(savedBrain);
+        const data = JSON.parse(saved);
         if (data.w1 && data.w1.length === HIDDEN1 && data.w1[0].length === INPUTS) {
           bestBrainEver = new NeuralNetwork(data.w1, data.b1, data.w2, data.b2, data.w3, data.b3);
           bestFitnessEver = data.fitness || 10000;
           currentGen = data.gen || 1;
-        } else {
-          localStorage.removeItem('ai_evo_saved_brain');
         }
-      } catch(e) { console.log("No valid saved brain."); }
+      } catch(e) {}
     }
-    
     if (personalBestGen > 1) {
       document.getElementById('personalBestBox').style.display = 'block';
       document.getElementById('personalBestGen').innerText = personalBestGen;
@@ -282,49 +296,51 @@
     
     if (population[0].fitness > bestFitnessEver) {
       bestFitnessEver = population[0].fitness;
-      bestBrainEver = new NeuralNetwork(
-        population[0].brain.w1, population[0].brain.b1,
-        population[0].brain.w2, population[0].brain.b2,
-        population[0].brain.w3, population[0].brain.b3
-      );
-      
+      bestBrainEver = population[0].brain;
+      // حفظ تلقائي
       const dataToSave = { 
         gen: currentGen, fitness: bestFitnessEver, 
         w1: bestBrainEver.w1, b1: bestBrainEver.b1, 
         w2: bestBrainEver.w2, b2: bestBrainEver.b2,
         w3: bestBrainEver.w3, b3: bestBrainEver.b3
       };
-      localStorage.setItem('ai_evo_saved_brain', JSON.stringify(dataToSave));
+      localStorage.setItem('quantum_ai_brain', JSON.stringify(dataToSave));
     }
     
     if (currentGen > personalBestGen) {
       personalBestGen = currentGen;
-      localStorage.setItem('ai_evo_best_gen', personalBestGen);
+      localStorage.setItem('quantum_ai_best_gen', personalBestGen);
       document.getElementById('statRecord').innerText = personalBestGen;
       document.getElementById('personalBestBox').style.display = 'block';
       document.getElementById('personalBestGen').innerText = personalBestGen;
     }
 
     let newPop = [];
-    newPop.push(new Agent(bestBrainEver));
+    newPop.push(new Agent(bestBrainEver)); // النخبة
+    
     for (let i = 1; i < POP_SIZE; i++) {
-      let p1 = population[Math.floor(Math.random() * 20)];
+      let p1 = population[Math.floor(Math.random() * 20)]; // اختيار أفضل 20
       let p2 = population[Math.floor(Math.random() * 20)];
       let childBrain = p1.brain.crossover(p2.brain);
-      childBrain.mutate(0.1); // تقليل نسبة الطفرة قليلاً للشبكات العميقة
+      childBrain.mutate(mutationRate);
       newPop.push(new Agent(childBrain));
     }
+    
     population = newPop;
     currentGen++;
     frameCount = 0;
+    stagnationFrames = 0;
+    lastBestFitness = 0;
+    
+    // الطفرة التكيفية: إذا لم يتحسن الأداء، نزيد الطفرة
+    if (currentGen % 10 === 0) {
+      mutationRate = Math.min(0.5, mutationRate + 0.05);
+    } else {
+      mutationRate = Math.max(0.05, mutationRate - 0.01);
+    }
+
     document.getElementById('statGen').innerText = currentGen;
     document.getElementById('statBest').innerText = Math.floor(bestFitnessEver);
-    
-    let status = 'يتعلم...';
-    if (currentGen > 5) status = 'يتحسن 🚀';
-    if (currentGen > 20) status = 'ذكي جداً 🧠';
-    if (currentGen > 50) status = 'عبقري! ⭐';
-    document.getElementById('statStatus').innerText = status;
     
     if (currentGen > 10) document.getElementById('btnChampion').style.display = 'flex';
   }
@@ -333,21 +349,21 @@
     if (isPaused) return;
     
     time += 0.02;
+    // الهدف يتحرك في مسار دائري
     targetX = width/2 + Math.sin(time * 0.8) * (width * 0.35);
     targetY = height/2 + Math.cos(time * 1.2) * (height * 0.3);
+    
+    // الجدران تتحرك صعوداً وهبوطاً (تحدي إضافي)
+    let wallOffset = Math.sin(time * 1.5) * (height * 0.15);
+    walls[0].y = -height/2 + wallOffset;
+    walls[1].y = height/2 + wallOffset;
 
     for (let s = 0; s < speedMultiplier; s++) {
       let aliveCount = 0;
       for (let agent of population) if (!agent.dead) { agent.update(); aliveCount++; }
       frameCount++;
       
-      if (championMode && aliveCount === 0) {
-        population[0].dead = false;
-        population[0].x = startX;
-        population[0].y = startY;
-        aliveCount = 1;
-      }
-      
+      // نظام القتل الرحيم
       if (!championMode) {
         if (population[0].fitness > lastBestFitness) {
           lastBestFitness = population[0].fitness;
@@ -356,13 +372,27 @@
           stagnationFrames++;
         }
       }
+      
+      if (championMode && aliveCount === 0) {
+        population[0].dead = false;
+        population[0].x = startX;
+        population[0].y = startY;
+        aliveCount = 1;
+      }
+      
       if (!championMode && (aliveCount === 0 || frameCount >= LIFESPAN || stagnationFrames > 60)) { 
-        stagnationFrames = 0;
-        lastBestFitness = 0; 
         nextGeneration(); 
         break; 
       }
       document.getElementById('statAlive').innerText = aliveCount;
+    }
+    
+    // تحديث الجزيئات
+    for (let i = particles.length - 1; i >= 0; i--) {
+      let p = particles[i];
+      p.x += p.vx; p.y += p.vy;
+      p.life -= 0.02;
+      if (p.life <= 0) particles.splice(i, 1);
     }
   }
 
@@ -370,16 +400,18 @@
     ctx.fillStyle = 'rgba(11, 17, 32, 0.4)';
     ctx.fillRect(0, 0, width, height);
     
+    // رسم الجدران
     ctx.fillStyle = '#334155';
     for (let w of walls) {
       ctx.fillRect(w.x, w.y, w.w, w.h);
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)';
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.5)';
       ctx.lineWidth = 2;
       ctx.strokeRect(w.x, w.y, w.w, w.h);
     }
     
+    // رسم الهدف
     ctx.beginPath();
-    ctx.arc(targetX, targetY, 25, 0, Math.PI*2);
+    ctx.arc(targetX, targetY, 20, 0, Math.PI*2);
     ctx.fillStyle = '#fbbf24';
     ctx.fill();
     ctx.shadowBlur = 25;
@@ -389,20 +421,40 @@
     ctx.stroke();
     ctx.shadowBlur = 0;
     
+    // رسم الجزيئات
+    for (let p of particles) {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 2, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(251, 191, 36, ${p.life})`;
+      ctx.fill();
+    }
+    
+    // رسم الكائنات
     for (let agent of population) {
       if (agent.dead) continue;
+      let isLeader = (population[0] === agent && !agent.dead);
       
       if (agent.trail.length > 1) {
         ctx.beginPath();
         ctx.moveTo(agent.trail[0].x, agent.trail[0].y);
         for (let i = 1; i < agent.trail.length; i++) ctx.lineTo(agent.trail[i].x, agent.trail[i].y);
-        let isLeader = (population[0] === agent && !agent.dead);
         ctx.strokeStyle = isLeader ? 'rgba(56, 189, 248, 0.8)' : 'rgba(148, 163, 184, 0.1)';
-        ctx.lineWidth = isLeader ? 4 : 1;
+        ctx.lineWidth = isLeader ? 3 : 1;
         ctx.stroke();
       }
       
-      let isLeader = (population[0] === agent && !agent.dead);
+      // رسم أشعة الليزر للبطل فقط
+      if (isLeader && championMode) {
+        ctx.beginPath();
+        for (let r of agent.lidarRays) {
+          ctx.moveTo(agent.x, agent.y);
+          ctx.lineTo(r.x, r.y);
+        }
+        ctx.strokeStyle = 'rgba(255, 50, 50, 0.4)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+      
       ctx.beginPath();
       ctx.arc(agent.x, agent.y, isLeader ? 8 : 3, 0, Math.PI*2);
       ctx.fillStyle = isLeader ? '#38bdf8' : '#64748b';
@@ -420,21 +472,19 @@
     ctx.scale(dpr, dpr);
     startX = width * 0.1; startY = height * 0.5;
     let wallThickness = width * 0.05;
-    let gap = height * 0.35;
+    let gap = height * 0.3;
     walls = [
-      { x: width/2 - wallThickness/2, y: 0, w: wallThickness, h: (height - gap)/2 },
-      { x: width/2 - wallThickness/2, y: (height + gap)/2, w: wallThickness, h: (height - gap)/2 }
+      { x: width/2 - wallThickness/2, y: -height/2, w: wallThickness, h: height/2 + gap/2 },
+      { x: width/2 - wallThickness/2, y: height - gap/2, w: wallThickness, h: height/2 }
     ];
   }
   window.addEventListener('resize', resize); resize();
 
   document.getElementById('btnSpeed').addEventListener('click', (e) => {
-    if (speedMultiplier === 1) { speedMultiplier = 5; e.target.innerText = '⏩ السرعة: x5'; }
-    else if (speedMultiplier === 5) { speedMultiplier = 20; e.target.innerText = '⏩ السرعة: x20'; }
-    else if (speedMultiplier === 20) { speedMultiplier = 50; e.target.innerText = '🚀 السرعة: x50'; }
-    else if (speedMultiplier === 50) { speedMultiplier = 100; e.target.innerText = '⚡ السرعة: x100'; }
-    else if (speedMultiplier === 100) { speedMultiplier = 500; e.target.innerText = '🔥 السرعة: x500'; }
-    else if (speedMultiplier === 500) { speedMultiplier = 1000; e.target.innerText = '☄️ السرعة: x1000'; }
+    if (speedMultiplier === 1) { speedMultiplier = 10; e.target.innerText = '⏩ السرعة: x10'; }
+    else if (speedMultiplier === 10) { speedMultiplier = 100; e.target.innerText = '⚡ السرعة: x100'; }
+    else if (speedMultiplier === 100) { speedMultiplier = 1000; e.target.innerText = '🔥 السرعة: x1000'; }
+    else if (speedMultiplier === 1000) { speedMultiplier = 5000; e.target.innerText = '☄️ السرعة: x5000'; }
     else { speedMultiplier = 1; e.target.innerText = '⏩ السرعة: x1'; }
   });
 
@@ -444,15 +494,14 @@
   });
 
   document.getElementById('btnReset').addEventListener('click', () => {
-    if(!confirm('هل أنت متأكد من مسح كل التقدم والبدء من جديد؟')) return;
+    if(!confirm('هل أنت متأكد من مسح كل التقدم؟')) return;
     currentGen = 1; bestFitnessEver = 0; bestBrainEver = null;
-    championMode = false;
-    localStorage.removeItem('ai_evo_saved_brain');
-    localStorage.removeItem('ai_evo_best_gen');
+    championMode = false; mutationRate = 0.1;
+    localStorage.removeItem('quantum_ai_brain');
+    localStorage.removeItem('quantum_ai_best_gen');
     personalBestGen = 1;
     document.getElementById('statGen').innerText = currentGen;
     document.getElementById('statBest').innerText = '0';
-    document.getElementById('statStatus').innerText = 'يتعلم...';
     document.getElementById('personalBestBox').style.display = 'none';
     document.getElementById('statRecord').innerText = '1';
     document.getElementById('btnChampion').style.display = 'none';
@@ -475,17 +524,12 @@
   });
 
   document.getElementById('btnSaveBrain').addEventListener('click', () => {
-    if (!bestBrainEver) return alert('لم يتم تطوير عقل بعد! انتظر بضعة أجيال.');
-    const data = { 
-      gen: currentGen, 
-      w1: bestBrainEver.w1, b1: bestBrainEver.b1, 
-      w2: bestBrainEver.w2, b2: bestBrainEver.b2,
-      w3: bestBrainEver.w3, b3: bestBrainEver.b3
-    };
+    if (!bestBrainEver) return alert('لم يتم تطوير عقل بعد!');
+    const data = { gen: currentGen, w1: bestBrainEver.w1, b1: bestBrainEver.b1, w2: bestBrainEver.w2, b2: bestBrainEver.b2, w3: bestBrainEver.w3, b3: bestBrainEver.b3 };
     const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = `deep_brain_gen_${currentGen}.json`;
+    a.href = url; a.download = `quantum_brain_gen_${currentGen}.json`;
     a.click(); URL.revokeObjectURL(url);
   });
 
@@ -500,39 +544,18 @@
     reader.onload = (event) => {
       try {
         const data = JSON.parse(event.target.result);
-        if (!data.w1 || data.w1.length !== HIDDEN1 || data.w1[0].length !== INPUTS) {
-          return alert('هذا العقل قديم وغير متوافق مع الشبكة العميقة الجديدة. يرجى تدريب عقل جديد.');
-        }
+        if (!data.w1 || data.w1.length !== HIDDEN1) return alert('عقل غير متوافق!');
         bestBrainEver = new NeuralNetwork(data.w1, data.b1, data.w2, data.b2, data.w3, data.b3);
         bestFitnessEver = 10000;
         currentGen = data.gen || 1;
         document.getElementById('statGen').innerText = currentGen;
         document.getElementById('statBest').innerText = '10000+';
-        document.getElementById('statStatus').innerText = 'تم تحميل العقل! 🧠';
         championMode = false;
         initPopulation();
         alert('تم تحميل العقل بنجاح!');
-      } catch (err) {
-        alert('خطأ في قراءة الملف! تأكد من أنه ملف JSON صحيح.');
-      }
+      } catch (err) { alert('خطأ في قراءة الملف!'); }
     };
     reader.readAsText(file);
-  });
-  
-  document.getElementById('btnShare').addEventListener('click', async () => {
-    const shareData = {
-      title: 'AI Evolution Deep | تطور الذكاء الاصطناعي',
-      text: 'شاهد الذكاء الاصطناعي العميق يتطور ويتعلم المطاردة أمام عينك!',
-      url: window.location.href
-    };
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(window.location.href);
-        alert('✅ تم نسخ رابط الموقع!');
-      }
-    } catch (err) {}
   });
 
   loadSavedState();
