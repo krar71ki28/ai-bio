@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>3D Robot Evolution (Mobile)</title>
+<title>3D Robot Evolution V2</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 <style>
   body { margin: 0; overflow: hidden; background: #09090b; font-family: 'Cairo', sans-serif; color: #fff; touch-action: none; }
@@ -30,18 +30,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
   
   <script>
-    // 1. إعداد الرسم (محسن للموبايل)
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0f172a);
     scene.fog = new THREE.FogExp2(0x0f172a, 0.02);
 
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
-    camera.position.set(10, 5, -10);
+    camera.position.set(8, 5, -12);
 
-    // إيقاف الـ Antialias لتسريع الهاتف
     const renderer = new THREE.WebGLRenderer({ antialias: false });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    // تقليل الدقة لتخفيف الحمل على كرت الشاشة
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); 
     document.body.appendChild(renderer.domElement);
 
@@ -51,7 +48,7 @@
     scene.add(dirLight);
 
     const groundGeo = new THREE.PlaneGeometry(500, 500);
-    const groundMat = new THREE.MeshBasicMaterial({ color: 0x1e293b }); // لون مسطح لسرعة الرسم
+    const groundMat = new THREE.MeshBasicMaterial({ color: 0x1e293b });
     const groundMesh = new THREE.Mesh(groundGeo, groundMat);
     groundMesh.rotation.x = -Math.PI / 2;
     scene.add(groundMesh);
@@ -59,33 +56,32 @@
     const gridHelper = new THREE.GridHelper(500, 250, 0x38bdf8, 0x334155);
     scene.add(gridHelper);
 
-    // 2. إعداد الفيزياء (محسن)
     const world = new CANNON.World();
     world.gravity.set(0, -9.82, 0);
-    world.solver.iterations = 5; // تقليل الدقة لتسريع الحسابات
+    world.solver.iterations = 5; 
 
     const groundBody = new CANNON.Body({ mass: 0 });
     groundBody.addShape(new CANNON.Plane());
     groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
     world.addBody(groundBody);
 
-    // 3. الشبكة العصبية
+    // الشبكة العصبية المطورة (10 مدخلات -> 8 مخفية -> 4 مخرجات)
     class NeuralNet {
       constructor() {
-        this.w1 = Array.from({length: 6}, () => Array.from({length: 8}, () => Math.random() * 2 - 1));
-        this.w2 = Array.from({length: 4}, () => Array.from({length: 6}, () => Math.random() * 2 - 1));
+        this.w1 = Array.from({length: 10}, () => Array.from({length: 10}, () => Math.random() * 2 - 1));
+        this.w2 = Array.from({length: 4}, () => Array.from({length: 10}, () => Math.random() * 2 - 1));
       }
       predict(inputs) {
         let hidden = [];
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 10; i++) {
           let sum = 0;
-          for (let j = 0; j < 8; j++) sum += inputs[j] * this.w1[i][j];
+          for (let j = 0; j < 10; j++) sum += inputs[j] * this.w1[i][j];
           hidden.push(Math.tanh(sum));
         }
         let out = [];
         for (let i = 0; i < 4; i++) {
           let sum = 0;
-          for (let j = 0; j < 6; j++) sum += hidden[j] * this.w2[i][j];
+          for (let j = 0; j < 10; j++) sum += hidden[j] * this.w2[i][j];
           out.push(Math.tanh(sum));
         }
         return out;
@@ -97,32 +93,31 @@
       }
     }
 
-    // 4. الروبوت
     class Robot {
       constructor(brain) {
         this.brain = brain || new NeuralNet();
         this.parts = [];
         this.meshes = [];
         this.constraints = [];
+        this.time = 0; // ساعة داخلية لإيقاع المشي
         
         const createPart = (w, h, d, mass, x, y, z, color) => {
           const shape = new CANNON.Box(new CANNON.Vec3(w/2, h/2, d/2));
           const body = new CANNON.Body({ mass: mass, shape: shape });
           body.position.set(x, y, z);
           world.addBody(body);
-          
           const mesh = new THREE.Mesh(
             new THREE.BoxGeometry(w, h, d),
-            new THREE.MeshLambertMaterial({ color: color }) // مادة أخف من Standard
+            new THREE.MeshLambertMaterial({ color: color })
           );
           scene.add(mesh);
-          
           this.parts.push(body);
           this.meshes.push(mesh);
           return body;
         };
 
-        this.torso = createPart(1, 1.5, 0.5, 10, 0, 3, 0, 0x38bdf8); 
+        // جذع أخف قليلاً لسهولة التوازن
+        this.torso = createPart(1, 1.5, 0.5, 8, 0, 3, 0, 0x38bdf8); 
         this.lThigh = createPart(0.3, 1, 0.3, 2, -0.3, 1.8, 0, 0xa78bfa);
         this.lCalf = createPart(0.3, 1, 0.3, 1, -0.3, 0.8, 0, 0x38bdf8);
         this.rThigh = createPart(0.3, 1, 0.3, 2, 0.3, 1.8, 0, 0xa78bfa);
@@ -135,7 +130,7 @@
           });
           world.addConstraint(joint);
           joint.enableMotor();
-          joint.setMotorMaxForce(50);
+          joint.setMotorMaxForce(80); // قوة محرك أعلى
           this.constraints.push(joint);
         };
 
@@ -152,26 +147,40 @@
       update() {
         if (this.dead) return;
         this.life++;
+        this.time += 0.1; // تقدم الساعة
         
         let tPos = this.torso.position;
         let tVel = this.torso.velocity;
         
-        let inputs = [tVel.z/5, tVel.y/5, this.torso.angularVelocity.x/5, this.lThigh.angularVelocity.x/5, this.lCalf.angularVelocity.x/5, this.rThigh.angularVelocity.x/5, this.rCalf.angularVelocity.x/5, 1];
+        // المدخلات (10): السرعة، التوازن، زوايا المفاصل + الساعة الداخلية (sin, cos)
+        let inputs = [
+          tVel.z / 5, tVel.y / 5, this.torso.angularVelocity.x / 5,
+          this.lThigh.angularVelocity.x / 5, this.lCalf.angularVelocity.x / 5,
+          this.rThigh.angularVelocity.x / 5, this.rCalf.angularVelocity.x / 5,
+          1, // Bias
+          Math.sin(this.time), // موجة الجيب (للمشي)
+          Math.cos(this.time)  // موجة الجيب
+        ];
+        
         let out = this.brain.predict(inputs);
         
-        this.constraints[0].setMotorSpeed(out[0] * 10);
-        this.constraints[1].setMotorSpeed(out[1] * 10);
-        this.constraints[2].setMotorSpeed(out[2] * 10);
-        this.constraints[3].setMotorSpeed(out[3] * 10);
+        this.constraints[0].setMotorSpeed(out[0] * 15);
+        this.constraints[1].setMotorSpeed(out[1] * 15);
+        this.constraints[2].setMotorSpeed(out[2] * 15);
+        this.constraints[3].setMotorSpeed(out[3] * 15);
         
         for (let i = 0; i < this.parts.length; i++) {
           this.meshes[i].position.copy(this.parts[i].position);
           this.meshes[i].quaternion.copy(this.parts[i].quaternion);
         }
         
-        this.fitness = tPos.z;
+        // 🌟 دالة اللياقة الجديدة:
+        // المسافة (z) + عقاب شديد إذا نزل الجذع (y)
+        let distScore = tPos.z;
+        let heightPenalty = tPos.y < 2.0 ? -10 : 0; // عقاب إذا سقط الجذع
+        this.fitness = distScore + heightPenalty;
         
-        if (tPos.y < 1.5 || this.life > 400) {
+        if (tPos.y < 1.2 || this.life > 500) {
           this.dead = true;
           this.meshes.forEach(m => m.visible = false);
         }
@@ -184,11 +193,10 @@
       }
     }
 
-    // 5. الإعدادات
-    const POP_SIZE = 5; // 5 روبوتات فقط (بدلاً من 15)
+    const POP_SIZE = 5;
     let robots = [];
     let bestBrain = null;
-    let bestFitness = 0;
+    let bestFitness = -100;
     let gen = 1;
     let speed = 1;
     let maxZReached = 0;
@@ -200,13 +208,12 @@
       gen = 1;
       maxZReached = 0;
       document.getElementById('genText').innerText = gen;
-      camera.position.set(5, 4, -10);
+      camera.position.set(8, 5, -12);
     }
 
     function animate() {
       requestAnimationFrame(animate);
       
-      // تقليل الحد الأقصى للسرعة إلى 5 لحماية الهاتف
       let safeSpeed = Math.min(speed, 5);
 
       for (let s = 0; s < safeSpeed; s++) {
@@ -249,14 +256,14 @@
           
           gen++;
           document.getElementById('genText').innerText = gen;
-          document.getElementById('fitText').innerText = bestFitness.toFixed(1);
+          document.getElementById('fitText').innerText = Math.max(0, bestFitness).toFixed(1);
           maxZReached = 0;
           break;
         }
       }
       
-      camera.position.z = THREE.MathUtils.lerp(camera.position.z, maxZReached - 8, 0.05);
-      camera.position.x = THREE.MathUtils.lerp(camera.position.x, 4, 0.05);
+      camera.position.z = THREE.MathUtils.lerp(camera.position.z, maxZReached - 10, 0.05);
+      camera.position.x = THREE.MathUtils.lerp(camera.position.x, 5, 0.05);
       camera.position.y = THREE.MathUtils.lerp(camera.position.y, 4, 0.05);
       camera.lookAt(0, 2, maxZReached + 2);
       
@@ -268,7 +275,7 @@
       e.target.innerText = '⏩ السرعة: x' + speed;
     };
     
-    document.getElementById('btnReset').onclick = () => { bestBrain = null; bestFitness = 0; init(); };
+    document.getElementById('btnReset').onclick = () => { bestBrain = null; bestFitness = -100; init(); };
 
     init();
     animate();
