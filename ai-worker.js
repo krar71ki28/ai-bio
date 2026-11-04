@@ -139,7 +139,6 @@ function init() {
 function update() {
   if (isPaused) return;
   
-  // تحديد السرعة القصوى برمجياً بـ 100 لمنع تجميد المعالج
   let safeSpeed = Math.min(speedMultiplier, 100);
   
   for (let s = 0; s < safeSpeed; s++) {
@@ -170,15 +169,18 @@ function getRenderData() {
 self.onmessage = (e) => {
   const msg = e.data;
   if (msg.type === 'init') {
-    if (msg.width) width = msg.width;
-    if (msg.height) height = msg.height;
+    if (msg.width && msg.width > 0) width = msg.width;
+    if (msg.height && msg.height > 0) height = msg.height;
     init();
     setInterval(() => {
       update();
       self.postMessage(getRenderData());
     }, 16);
   }
-  if (msg.type === 'resize') { width = msg.width; height = msg.height; }
+  if (msg.type === 'resize') { 
+    if (msg.width && msg.width > 0) width = msg.width; 
+    if (msg.height && msg.height > 0) height = msg.height; 
+  }
   if (msg.type === 'speed') speedMultiplier = msg.value;
   if (msg.type === 'pause') isPaused = msg.value;
   if (msg.type === 'reset') init();

@@ -7,12 +7,25 @@ let renderData = null;
 
 function resize() {
   const dpr = window.devicePixelRatio || 1;
-  width = canvas.clientWidth; height = canvas.clientHeight;
-  canvas.width = width * dpr; canvas.height = height * dpr;
+  width = canvas.clientWidth;
+  height = canvas.clientHeight;
+  
+  // حماية: إذا كانت الأبعاد صفر، استخدم أبعاد الشاشة
+  if (width === 0 || height === 0) {
+    width = window.innerWidth;
+    height = window.innerHeight * 0.7;
+  }
+  
+  canvas.width = width * dpr; 
+  canvas.height = height * dpr;
+  
+  // إصلاح مشكلة تكرار التكبير (Reset Transform)
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.scale(dpr, dpr);
+  
   worker.postMessage({ type: 'resize', width, height });
 }
-window.addEventListener('resize', resize); resize();
+window.addEventListener('resize', resize);
 
 worker.onmessage = (e) => {
   const data = e.data;
@@ -26,7 +39,7 @@ worker.onmessage = (e) => {
 
 function draw() {
   if (!renderData) return;
-  ctx.fillStyle = 'rgba(11, 17, 32, 0.6)'; // تأثير الشفافية (Motion Blur)
+  ctx.fillStyle = 'rgba(11, 17, 32, 0.6)';
   ctx.fillRect(0, 0, width, height);
   
   // رسم الطعام
@@ -56,7 +69,6 @@ function draw() {
 }
 
 document.getElementById('btnSpeed').addEventListener('click', (e) => {
-  // الحد الأقصى للسرعة هو 100 لتجنب تجميد الهاتف
   const speeds = [1, 5, 10, 50, 100];
   let currentSpeed = parseInt(document.getElementById('statSpeed').innerText.replace('x', ''));
   let idx = speeds.indexOf(currentSpeed);
@@ -75,5 +87,8 @@ document.getElementById('btnReset').addEventListener('click', () => {
   if (confirm('هل تريد إعادة تشغيل النظام البيئي من الصفر؟')) worker.postMessage({ type: 'reset' });
 });
 
-// بدء التشغيل مع إرسال الأبعاد الحقيقية للشاشة
-worker.postMessage({ type: 'init', width: canvas.clientWidth || 800, height: canvas.clientHeight || 600 });
+// تشغيل المحاكي بعد تحميل الصفحة بالكامل لضمان وجود أبعاد
+window.addEventListener('load', () => {
+  resize();
+  worker.postMessage({ type: 'init', width: width, height: height });
+});
