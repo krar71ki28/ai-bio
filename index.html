@@ -119,7 +119,7 @@
   let targetX, targetY, startX, startY;
   let walls = [];
   const POP_SIZE = 50; // زيادة عدد الكائنات
-  const LIFESPAN = 400;
+  const LIFESPAN = 250;
   let speedMultiplier = 1;
   let isPaused = false;
   let population = [];
@@ -129,6 +129,8 @@
   let bestBrainEver = null;
   let championMode = false;
   let time = 0;
+  let stagnationFrames = 0;
+  let lastBestFitness = 0;
   
   // هيكل الشبكة العميقة
   const INPUTS = 6; // dx, dy, vx, vy, dist to wall 1, dist to wall 2
@@ -346,7 +348,17 @@
         aliveCount = 1;
       }
       
-      if (!championMode && (aliveCount === 0 || frameCount >= LIFESPAN)) { 
+      if (!championMode) {
+        if (population[0].fitness > lastBestFitness) {
+          lastBestFitness = population[0].fitness;
+          stagnationFrames = 0;
+        } else {
+          stagnationFrames++;
+        }
+      }
+      if (!championMode && (aliveCount === 0 || frameCount >= LIFESPAN || stagnationFrames > 60)) { 
+        stagnationFrames = 0;
+        lastBestFitness = 0; 
         nextGeneration(); 
         break; 
       }
@@ -420,6 +432,9 @@
     if (speedMultiplier === 1) { speedMultiplier = 5; e.target.innerText = '⏩ السرعة: x5'; }
     else if (speedMultiplier === 5) { speedMultiplier = 20; e.target.innerText = '⏩ السرعة: x20'; }
     else if (speedMultiplier === 20) { speedMultiplier = 50; e.target.innerText = '🚀 السرعة: x50'; }
+    else if (speedMultiplier === 50) { speedMultiplier = 100; e.target.innerText = '⚡ السرعة: x100'; }
+    else if (speedMultiplier === 100) { speedMultiplier = 500; e.target.innerText = '🔥 السرعة: x500'; }
+    else if (speedMultiplier === 500) { speedMultiplier = 1000; e.target.innerText = '☄️ السرعة: x1000'; }
     else { speedMultiplier = 1; e.target.innerText = '⏩ السرعة: x1'; }
   });
 
