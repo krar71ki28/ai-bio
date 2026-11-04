@@ -3,41 +3,147 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Ecosystem AI - Professional</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦠</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<title>My Local AI (Mini-ChatGPT)</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --primary: #38bdf8; --user-msg: #0ea5e9; --ai-msg: #334155; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; height: 100vh; display: flex; flex-direction: column; }
+  
+  .header { text-align: center; padding: 15px; background: rgba(15,23,42,0.9); border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .header h1 { font-size: 18px; color: var(--primary); }
+  .header p { font-size: 12px; color: #94a3b8; margin-top: 5px; }
+
+  .chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+  
+  .message { max-width: 85%; padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.6; animation: fadeIn 0.3s ease; }
+  .message.user { align-self: flex-end; background: var(--user-msg); color: #fff; border-bottom-right-radius: 4px; }
+  .message.ai { align-self: flex-start; background: var(--ai-msg); color: #f8fafc; border-bottom-left-radius: 4px; }
+  
+  .loading { align-self: flex-start; background: var(--ai-msg); padding: 12px 16px; border-radius: 16px; display: flex; gap: 5px; align-items: center; }
+  .dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
+  .dot:nth-child(1) { animation-delay: -0.32s; }
+  .dot:nth-child(2) { animation-delay: -0.16s; }
+
+  .input-area { padding: 15px; background: var(--card); border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px; }
+  .input-area input { flex: 1; padding: 12px 16px; border-radius: 24px; border: none; background: rgba(0,0,0,0.2); color: #fff; font-family: 'Cairo'; font-size: 14px; outline: none; }
+  .input-area button { padding: 0 20px; border-radius: 24px; border: none; background: var(--primary); color: #000; font-weight: bold; font-family: 'Cairo'; cursor: pointer; transition: 0.2s; }
+  .input-area button:disabled { opacity: 0.5; cursor: not-allowed; }
+  
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+</style>
 </head>
 <body>
-<nav>
-  <div class="logo">Ecosystem AI 🦠</div>
-  <div class="stats-bar">
-    <div class="stat-item"><span>فريسة</span><b id="statGenPrey" style="color:#10b981;">1</b></div>
-    <div class="stat-item"><span>مفترس</span><b id="statGenPred" style="color:#ef4444;">1</b></div>
-    <div class="stat-item"><span>السرعة</span><b id="statSpeed">x1</b></div>
+  <div class="header">
+    <h1>🤖 ذكائي الاصطناعي المحلي</h1>
+    <p>يعمل بالكامل على هاتفك (بدون إنترنت)</p>
   </div>
-</nav>
-<main class="simulator-container">
-  <div class="layout-grid">
-    <div class="canvas-wrapper">
-      <canvas id="canvas"></canvas>
-      <div class="hint">انقر لإضافة جدران • اسحب لرسمها</div>
-    </div>
-    <div class="brain-wrapper">
-      <div class="brain-title">الدماغ (أخضر: فريسة | أحمر: مفترس)</div>
-      <canvas id="brainCanvas"></canvas>
+
+  <div class="chat-container" id="chatBox">
+    <div class="message ai">
+      مرحباً! أنا نموذج لغوي صغير أعمل محلياً. اسألني أي شيء (ملاحظة: قوتي محدودة جداً مقارنة بـ ChatGPT، وقد لا أفهم العربية جيداً لأنني أُدربت على الإنجليزية).
     </div>
   </div>
-  
-  <div class="controls">
-    <button class="btn btn-primary" id="btnSpeed">⏩ تسريع</button>
-    <button class="btn btn-secondary" id="btnPause">⏸️ إيقاف</button>
-    <button class="btn btn-accent" id="btnSave">💾 حفظ العقول</button>
-    <button class="btn btn-purple" id="btnLoad">📂 تحميل</button>
-    <button class="btn btn-red" id="btnReset">🔄 مسح</button>
-    <input type="file" id="fileInput" accept=".json">
+
+  <div class="input-area">
+    <input type="text" id="userInput" placeholder="اكتب رسالتك هنا..." disabled>
+    <button id="sendBtn" disabled>إرسال</button>
   </div>
-</main>
-<script src="main.js"></script>
+
+  <!-- استدعاء مكتبة Transformers.js من CDN -->
+  <script type="module">
+    import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.16.0';
+
+    // إعدادات المكتبة: السماح بتحميل النماذج من الإنترنت فقط (وتخزينها محلياً)
+    env.allowLocalModels = false;
+    env.useBrowserCache = true;
+
+    const chatBox = document.getElementById('chatBox');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    let generator = null;
+
+    // دالة تحميل النموذج
+    async function loadModel() {
+      try {
+        // استخدام نموذج LaMini-Flan-T5-77M (صغير جداً وسريع ومخصص للدردشة)
+        generator = await pipeline('text2text-generation', 'Xenova/LaMini-Flan-T5-77M', {
+          progress_callback: (data) => {
+            if (data.status === 'progress') {
+              const percent = Math.round((data.loaded / data.total) * 100);
+              chatBox.innerHTML = `<div class="message ai">جاري تحميل الدماغ الرقمي... (${percent}%)<br>قد يستغرق التحميل الأول دقيقة، وسيتم حفظه في هاتفك.</div>`;
+            }
+          }
+        });
+
+        chatBox.innerHTML = `<div class="message ai">✅ تم تحميل الذكاء الاصطناعي بنجاح! أنا جاهز للدردشة. (سيتم حفظ النموذج في هاتفك، التحميل القادم سيكون فورياً).</div>`;
+        userInput.disabled = false;
+        sendBtn.disabled = false;
+        userInput.focus();
+      } catch (error) {
+        chatBox.innerHTML = `<div class="message ai" style="color:#ef4444;">❌ فشل تحميل النموذج. تأكد من اتصالك بالإنترنت (للمرة الأولى فقط).<br>${error.message}</div>`;
+      }
+    }
+
+    // دالة إرسال الرسالة
+    async function sendMessage() {
+      const text = userInput.value.trim();
+      if (!text || !generator) return;
+
+      // إضافة رسالة المستخدم
+      addMessage(text, 'user');
+      userInput.value = '';
+      userInput.disabled = true;
+      sendBtn.disabled = true;
+
+      // إضافة مؤشر التحميل
+      const loadingDiv = document.createElement('div');
+      loadingDiv.className = 'loading';
+      loadingDiv.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+      chatBox.appendChild(loadingDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      try {
+        // توليد الرد من النموذج المحلي
+        const output = await generator(text, {
+          max_new_tokens: 150,
+          temperature: 0.7,
+          repetition_penalty: 1.5
+        });
+
+        // إزالة مؤشر التحميل وإضافة الرد
+        chatBox.removeChild(loadingDiv);
+        addMessage(output[0].generated_text, 'ai');
+      } catch (error) {
+        chatBox.removeChild(loadingDiv);
+        addMessage('حدث خطأ أثناء التفكير: ' + error.message, 'ai');
+      } finally {
+        userInput.disabled = false;
+        sendBtn.disabled = false;
+        userInput.focus();
+      }
+    }
+
+    function addMessage(text, sender) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `message ${sender}`;
+      msgDiv.innerText = text;
+      chatBox.appendChild(msgDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // ربط الأحداث
+    sendBtn.addEventListener('click', sendMessage);
+    userInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    // بدء التحميل
+    chatBox.innerHTML = `<div class="message ai">جاري تشغيل المعالج وتحميل النموذج...<br>يرجى الانتظار.</div>`;
+    loadModel();
+  </script>
 </body>
 </html>
