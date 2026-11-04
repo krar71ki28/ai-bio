@@ -3,40 +3,48 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>مختبر الذكاء الاصطناعي الشخصي</title>
+<title>مركز تطبيقات الذكاء الاصطناعي</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #0f172a; color: #f8fafc; font-family: 'Cairo', sans-serif; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
-  h1 { font-size: 28px; color: #38bdf8; margin-bottom: 10px; }
-  p { color: #94a3b8; margin-bottom: 40px; font-size: 16px; }
-  .cards { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
-  .card { background: #1e293b; padding: 30px 20px; border-radius: 20px; width: 280px; text-decoration: none; color: #fff; border: 2px solid rgba(255,255,255,0.1); transition: 0.3s; display: flex; flex-direction: column; align-items: center; }
-  .card:hover { transform: translateY(-10px); border-color: #38bdf8; box-shadow: 0 10px 30px rgba(56,189,248,0.2); }
-  .icon { font-size: 60px; margin-bottom: 15px; }
-  .card h2 { font-size: 20px; margin-bottom: 10px; }
-  .card p { font-size: 13px; color: #94a3b8; margin: 0; }
-</style>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <h1>🚀 مختبر الذكاء الاصطناعي</h1>
-  <p>مرحباً بك، اختر التقنية التي تريد تجربتها:</p>
-  
-  <div class="cards">
-    <!-- بطاقة لعبة التطور -->
-    <a href="ecosystem.html" class="card">
-      <div class="icon">🧬</div>
-      <h2>تطور الكائنات</h2>
-      <p>شاهد المفترسات والفرائس تتطور وتتعلم المطاردة عبر الأجيال.</p>
-    </a>
+  <div class="container">
+    <h1>🚀 مركز تطبيقات الذكاء الاصطناعي</h1>
+    <p>اختر التقنية التي تريد استكشافها:</p>
+    
+    <div class="cards">
+      <a href="game.html" class="card">
+        <div class="icon">🧬</div>
+        <h2>تطور الكائنات</h2>
+        <p>اللعبة الأساسية مع المعلق الذكي.</p>
+      </a>
 
-    <!-- بطاقة الدردشة -->
-    <a href="chat.html" class="card">
-      <div class="icon">🤖</div>
-      <h2>ذكائي المحلي</h2>
-      <p>تحدث مع نموذج ذكاء اصطناعي يعمل بدون إنترنت داخل هاتفك.</p>
-    </a>
+      <a href="daily.html" class="card">
+        <div class="badge">جديد</div>
+        <div class="icon">📅</div>
+        <h2>التحدي اليومي</h2>
+        <p>متاهة تتغير كل يوم. تحدَّ نفسك!</p>
+      </a>
+
+      <a href="swarm.html" class="card">
+        <div class="badge">سريع</div>
+        <div class="icon">🐝</div>
+        <h2>وضع الحشد</h2>
+        <p>آلاف الكائنات تتطور في نفس الوقت.</p>
+      </a>
+
+      <a href="chat.html" class="card">
+        <div class="icon">🤖</div>
+        <h2>ذكائي المحلي</h2>
+        <p>دردشة مع ذكاء اصطناعي يعمل بدون إنترنت.</p>
+      </a>
+    </div>
   </div>
+  <script>
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+  </script>
 </body>
 </html>
