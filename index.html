@@ -38,7 +38,6 @@
   .spinner { width: 50px; height: 50px; border: 5px solid rgba(168, 85, 247, 0.3); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* سجل الصور */
   .history-section { width: 100%; max-width: 600px; margin-top: 40px; }
   .history-title { font-size: 18px; color: #94a3b8; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
   .history-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -80,7 +79,6 @@
     <a id="downloadBtn" class="download-btn" download="ai_image.jpg">⬇️ تحميل</a>
   </div>
 
-  <!-- سجل الصور السابقة -->
   <div class="history-section" id="historySection" style="display: none;">
     <div class="history-title">📸 صورك السابقة</div>
     <div class="history-grid" id="historyGrid"></div>
@@ -89,7 +87,6 @@
   <script>
     let currentStyle = 'realistic';
 
-    // استرجاع الصور المحفوظة من ذاكرة الهاتف عند فتح الصفحة
     window.onload = () => {
       const savedImages = JSON.parse(localStorage.getItem('ai_images') || '[]');
       if (savedImages.length > 0) {
@@ -127,7 +124,6 @@
 
       const finalPrompt = prompt + stylePrompt;
       
-      // استخدام خادم آمن وموثوق
       const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
 
       img.onload = () => {
@@ -136,8 +132,6 @@
         btn.disabled = false;
         btn.innerHTML = '✨ توليد صورة أخرى';
         downloadBtn.href = imageUrl;
-
-        // حفظ الصورة في السجل المحلي
         saveToHistory(imageUrl, prompt);
       };
 
@@ -151,18 +145,16 @@
       img.src = imageUrl;
     }
 
-    // دالة حفظ الصورة في ذاكرة الهاتف
     function saveToHistory(url, prompt) {
       let images = JSON.parse(localStorage.getItem('ai_images') || '[]');
-      images.unshift({ url, prompt }); // إضافة الصورة الجديدة في البداية
-      if (images.length > 6) images.pop(); // الاحتفاظ بآخر 6 صور فقط
+      images.unshift({ url, prompt });
+      if (images.length > 6) images.pop();
       localStorage.setItem('ai_images', JSON.stringify(images));
       
       document.getElementById('historySection').style.display = 'block';
       renderHistory(images);
     }
 
-    // دالة عرض السجل
     function renderHistory(images) {
       const grid = document.getElementById('historyGrid');
       grid.innerHTML = '';
